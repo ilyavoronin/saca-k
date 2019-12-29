@@ -21,43 +21,21 @@ void SuffixSort::sortSuffixes(std::vector <int> &data, std::vector <int> &sorted
         sorted_suffixes.push_back(0);
         return;
     }
-
+    std::vector <int> block_begin;
     if (level == 0) {
-        int n = data.size();
         int max_symb_number = 0;
-        for (int i = 0; i < n; i++) {
+        for (int i = 0; i < data.size(); i++) {
             max_symb_number = std::max(data[i], max_symb_number);
         }
         max_symb_number++;
-        std::vector <int> block_begin(max_symb_number + 1);
-        //put all lms-suffixes in the beginning of `sorted_suffixes`
-        //and calculate block_begin
-        sorted_suffixes[0] = n - 1;
-        int cur_pos = 0;
-        bool last_type = 0;
-        block_begin[0] = 1;
-        int lms_n = 0;
-        for (int i = n - 2; i >= 0; i--) {
-            bool cur_type = 0;
-            if (data[i] < data[i + 1]) {
-                cur_type = 0;
-            }
-            else if (data[i] > data[i + 1]) {
-                cur_type = 1;
-            } else {
-                cur_type = last_type;
-            }
 
-            //checking if suffix is lms
-            if (cur_type != 0 && last_type == 0) {
-                sorted_suffixes[cur_pos++] = i + 1;
-                lms_n++;
-            }
-            last_type = cur_type;
-
+        //calculate block start
+        block_begin.resize(max_symb_number + 1);
+        for (int i = 0; i < data.size(); i++) {
             block_begin[data[i]]++;
         }
-        cur_pos = 0;
+
+        int cur_pos = 0;
         for (int i = 1; i < max_symb_number; i++) {
             int tmp = block_begin[i];
             block_begin[i] = cur_pos;
@@ -65,98 +43,57 @@ void SuffixSort::sortSuffixes(std::vector <int> &data, std::vector <int> &sorted
         }
         block_begin[max_symb_number] = cur_pos;
 
-        inducedSortLevel0(data, block_begin, sorted_suffixes,
+        int lms_n = putLMS0(data, block_begin, sorted_suffixes, max_symb_number);
+        inducedSort0(data, block_begin, sorted_suffixes,
                           max_symb_number, lms_n);
+
+        //TODO sort lms strings
+
+        putSortedLMS0(data, block_begin, sorted_suffixes, max_symb_number, lms_n);
+        inducedSort0(data, block_begin, sorted_suffixes, max_symb_number, lms_n);
     }
     else {
-        int lms_n = 0;
-        int last_type = 0;
-        int cur_pos = 1;
-        for (int i = beg + size - 2; i >= beg; i--) {
-            int cur_type = 0;
-            if (sorted_suffixes[i] < sorted_suffixes[i + 1]) {
-                cur_type = 0;
-            } else if (sorted_suffixes[i] > sorted_suffixes[i + 1]) {
-                cur_type = 1;
-            } else {
-                cur_type = last_type;
-            }
-            if (cur_type == 1 && last_type == 0) {
-                sorted_suffixes[cur_pos++] = i + 1;
-                lms_n++;
-            }
-            last_type = cur_type;
+
+    }
+}
+
+int SuffixSort::putLMS0(std::vector<int> &data, std::vector<int> &block_begin,
+                         std::vector<int> &sorted_suffixes,
+                         int max_symb_number) {
+    int n = data.size();
+    std::vector <int> cur_shift(max_symb_number, 0);
+    sorted_suffixes[0] = n - 1;
+    int cur_pos = 0;
+    bool last_type = 0;
+    int lms_n = 0;
+    for (int i = n - 2; i >= 0; i--) {
+        bool cur_type = 0;
+        if (data[i] < data[i + 1]) {
+            cur_type = 0;
+        }
+        else if (data[i] > data[i + 1]) {
+            cur_type = 1;
+        } else {
+            cur_type = last_type;
         }
 
-        inducedSortLevel1(sorted_suffixes, lms_n);
+        //checking if (i + 1) is lms suffix
+        if (cur_type != 0 && last_type == 0) {
+            int symb = data[i + 1];
+            int pos = block_begin[symb] + cur_shift[symb];
+            sorted_suffixes[pos] = i + 1;
+            cur_shift[symb]++;
+            lms_n++;
+        }
+        last_type = cur_type;
     }
-    /*
-    std::vector <int> sorted_lms;
-    std::vector <int> eq_class(data.size());
-    int cur_class = 0;
-    int last_lms_index = -1;
-    int cc = 0;
-    for (int i = 0; i < sorted_suffixes.size(); i++) {
-        if (!is_lms[sorted_suffixes[i]]) {
-            continue;
-        }
-        if (last_lms_index == -1) {
-            eq_class[sorted_suffixes[i]] = cur_class;
-            last_lms_index = sorted_suffixes[i];
-            continue;
-        }
-        int i1 = sorted_suffixes[i];
-        int i2 = last_lms_index;
-        bool is_eq = true;
-        if (data[i1] != data[i2]) {
-            is_eq = false;
-        }
-        else {
-            for (int j = 1; j < data.size(); j++) {
-                cc++;
-                if (data[i1 + j] != data[i2 + j]) {
-                    is_eq = false;
-                    break;
-                }
-                if (is_lms[i1 + j] || is_lms[i2 + j]) {
-                    if (!is_lms[i1 + j] || !is_lms[i2 + j]) {
-                        is_eq = false;
-                    }
-                    break;
-                }
-            }
-        }
-
-        if (!is_eq) {
-            cur_class++;
-        }
-        eq_class[sorted_suffixes[i]] = cur_class;
-        last_lms_index = sorted_suffixes[i];
-    }
-    std::vector <int> lms_data(lms_suffixes.size());
-    for (int i = 0; i < lms_suffixes.size(); i++) {
-        lms_data[i] = eq_class[lms_suffixes[i]];
-    }
-    sorted_suffixes.clear();
-    sortSuffixes(lms_data, sorted_suffixes);
-    std::vector <int> sorted_lms_suffixes(lms_suffixes.size());
-    for (int i = 0; i < sorted_suffixes.size(); i++) {
-        sorted_lms_suffixes[i] = lms_suffixes[sorted_suffixes[i]];
-    }
-
-    sorted_suffixes.clear();
-    inducedSort(data, type, begin_S, begin_L,
-                cnt_S, sorted_lms_suffixes,
-                sorted_suffixes, max_symb_number);
-    */
+    return lms_n;
 }
 
 
-void SuffixSort::inducedSortLevel0(std::vector <int> &data,
-                             std::vector <int> &block_begin,
-                             std::vector <int> &sorted_suffixes,
-                             int max_symb_number,
-                             int lms_n) {
+void SuffixSort::putSortedLMS0(std::vector<int> &data, std::vector<int> &block_begin,
+                               std::vector<int> &sorted_suffixes,
+                               int max_symb_number, int lms_n) {
     for (int i = lms_n; i < sorted_suffixes.size(); i++) {
         sorted_suffixes[i] = -1;
     }
@@ -169,9 +106,17 @@ void SuffixSort::inducedSortLevel0(std::vector <int> &data,
         sorted_suffixes[pos] = sorted_suffixes[i];
         sorted_suffixes[i] = -1;
     }
+}
 
+//put L and S suffixes in there places
+void SuffixSort::inducedSort0(std::vector <int> &data,
+                             std::vector <int> &block_begin,
+                             std::vector <int> &sorted_suffixes,
+                             int max_symb_number,
+                             int lms_n) {
+
+    std::vector <int> cur_shift(max_symb_number, 0);
     //find positions for L-suffixes
-    cur_shift.assign(max_symb_number, 0);
     for (int i = 0; i < sorted_suffixes.size(); i++) {
         int j = sorted_suffixes[i];
         int symb = data[j - 1];
@@ -204,5 +149,7 @@ void SuffixSort::inducedSortLevel1(std::vector<int> &sorted_suffixes, int lms_n,
     }
 
     //put lms-suffixes in there places
+    for (int i = lms_n - 1; i >= 0; i--) {
 
+    }
 }
