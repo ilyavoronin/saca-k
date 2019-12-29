@@ -158,7 +158,7 @@ void SuffixSort::inducedSortLevel0(std::vector <int> &data,
                              int max_symb_number,
                              int lms_n) {
     for (int i = lms_n; i < sorted_suffixes.size(); i++) {
-        sorted_suffixes[i] == -1;
+        sorted_suffixes[i] = -1;
     }
     std::vector<int> cur_shift(max_symb_number, 0);
 
@@ -167,6 +167,7 @@ void SuffixSort::inducedSortLevel0(std::vector <int> &data,
         int symb = data[sorted_suffixes[i]];
         int pos = block_begin[symb + 1] - 1 - cur_shift[symb];
         sorted_suffixes[pos] = sorted_suffixes[i];
+        sorted_suffixes[i] = -1;
     }
 
     //find positions for L-suffixes
@@ -196,6 +197,12 @@ void SuffixSort::inducedSortLevel0(std::vector <int> &data,
     }
 }
 
-void SuffixSort::inducedSortLevel1(std::vector<int> &sorted_suffixes, int lms_n) {
+void SuffixSort::inducedSortLevel1(std::vector<int> &sorted_suffixes, int lms_n,
+                                   int beg, int size) {
+    for (int i = lms_n; i < size; i++) {
+        sorted_suffixes[i] = EMPTY;
+    }
+
+    //put lms-suffixes in there places
 
 }
