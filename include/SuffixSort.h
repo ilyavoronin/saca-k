@@ -2,6 +2,7 @@
 #define SACA_K_SUFFIXSORT_H
 
 #include <vector>
+#include <climits>
 
 class SuffixSort {
 public:
@@ -9,17 +10,22 @@ public:
 
 private:
     //SA-IS algorithm
-    void sortSuffixes(std::vector <int> &data, std::vector <int> &sorted_suffixes);
+    void sortSuffixes(std::vector <int> &data, std::vector <int> &sorted_suffixes,
+                      int level, int beg, int size);
 
-    //sort suffixes if `lms_suffixes` has been sorted
-    void inducedSort(std::vector <int> &data,
-                     std::vector <bool> &type,
-                     std::vector <int> &begin_S,
-                     std::vector <int> &begin_L,
-                     std::vector <int> &cnt_S,
-                     std::vector <int> &lms_suffixes,
+    //sort suffixes if `lms_suffixes` has been sorted for level 0
+    void inducedSortLevel0(std::vector <int> &data,
+                     std::vector <int> &block_begin,
                      std::vector <int> &sorted_suffixes,
-                     int max_symb_number);
+                     int max_symb_number,
+                     int lms_n);
+
+    //sort suffixes if `lms_suffixes` has been sorted for level > 0
+    void inducedSortLevel1(std::vector <int> &sorted_suffixes,
+                           int lms_n);
+
+
+    int EMPTY = INT_MIN;
 };
 
 
