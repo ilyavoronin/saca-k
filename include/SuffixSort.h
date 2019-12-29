@@ -33,11 +33,19 @@ private:
                      int max_symb_number,
                      int lms_n);
 
+    //put LMS suffixes that hasn't been sorted in their blocks(level 1)
+    //return number of lms suffixes
+    int putLMS1(std::vector <int> &sorted_suffixes,
+                 int beg, int size);
+
+    //put sorted LMS suffixes in their blocks(level 1)
+    void putSortedLMS1(std::vector <int> &sorted_suffixes,
+                      int lms_n, int beg, int size);
+
     //sort suffixes if `lms_suffixes` has been sorted for level > 0
     //data is stored in sorted_suffixes from `beg` to (`beg` + `size`)
-    void inducedSortLevel1(std::vector <int> &sorted_suffixes,
-                           int lms_n, int beg, int size);
-
+    void inducedSort1(std::vector <int> &sorted_suffixes,
+                      int lms_n, int beg, int size);
 
     int EMPTY = INT_MIN;
 };

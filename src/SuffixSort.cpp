@@ -47,13 +47,19 @@ void SuffixSort::sortSuffixes(std::vector <int> &data, std::vector <int> &sorted
         inducedSort0(data, block_begin, sorted_suffixes,
                           max_symb_number, lms_n);
 
-        //TODO sort lms strings
+        //TODO sort lms substrings
 
         putSortedLMS0(data, block_begin, sorted_suffixes, max_symb_number, lms_n);
         inducedSort0(data, block_begin, sorted_suffixes, max_symb_number, lms_n);
     }
     else {
+        int lms_n = putLMS1(sorted_suffixes, beg, size);
+        inducedSort1(sorted_suffixes, lms_n, beg, size);
 
+        //TODO sort lms substrings
+
+        putSortedLMS1(sorted_suffixes, lms_n, beg, size);
+        inducedSort1(sorted_suffixes, lms_n, beg, size);
     }
 }
 
@@ -142,7 +148,16 @@ void SuffixSort::inducedSort0(std::vector <int> &data,
     }
 }
 
-void SuffixSort::inducedSortLevel1(std::vector<int> &sorted_suffixes, int lms_n,
+int SuffixSort::putLMS1(std::vector<int> &sorted_suffixes, int beg, int size) {
+
+}
+
+void SuffixSort::putSortedLMS1(std::vector<int> &sorted_suffixes,
+                               int lms_n, int beg, int size) {
+
+}
+
+void SuffixSort::inducedSort1(std::vector<int> &sorted_suffixes, int lms_n,
                                    int beg, int size) {
     for (int i = lms_n; i < size; i++) {
         sorted_suffixes[i] = EMPTY;
