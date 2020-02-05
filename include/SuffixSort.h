@@ -27,11 +27,17 @@ private:
                  int max_symb_number, int lms_n);
 
     //sort L and S suffixes if lms-suffixes had already been stored in their blocks(level 0)
+    //when we store lms-substrings we don't need to store all lms-prefixes,
+    //sort_lms_strings corresponds for that
     void inducedSort0(std::vector <int> &data,
                      std::vector <int> &block_begin,
                      std::vector <int> &sorted_suffixes,
                      int max_symb_number,
-                     int lms_n);
+                     bool sort_lms_strings);
+
+    void formNewString0(std::vector <int> &data,
+                       std::vector <int> &sorted_suffixes,
+                       int lms_n);
 
     //put LMS suffixes that hasn't been sorted in their blocks(level 1)
     //return number of lms suffixes
