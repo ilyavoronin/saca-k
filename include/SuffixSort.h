@@ -9,9 +9,12 @@ public:
     void sort(std::vector <int> &data, std::vector <int> &sorted_suffixes);
 
 private:
-    //SACA-K algorithm
-    void sortSuffixes(std::vector <int> &data, std::vector <int> &sorted_suffixes,
-                      int level, int beg, int size);
+    //first level of recursion, suffix array will be stored in `sorted_suffixes`
+    void sortSuffixes0(std::vector <int> &data, std::vector <int> &sorted_suffixes);
+
+    //array is stored in `sorted_suffixes` from `beg` to `beg + size`
+    //resulting suffix array will be stored in the beginning og the `sorted_suffixes`
+    void sortSuffixes1(std::vector <int> &sorted_suffixes, int beg, int size);
 
     //put LMS suffixes that hasn't been sorted in their blocks(level 0)
     //return number of lms suffixes

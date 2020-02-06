@@ -5,98 +5,93 @@ void SuffixSort::sort(std::vector <int> &data, std::vector <int> &sorted_suffixe
     for (int i = 0; i < (int)data.size() - 1; i++) {
         data[i]++;
     }
+    data.push_back(0);
     sorted_suffixes.resize(data.size());
-    sortSuffixes(data, sorted_suffixes, 0, 0, data.size());
+    sortSuffixes0(data, sorted_suffixes);
     for (int i = 0; i < (int)data.size() - 1; i++) {
         data[i]--;
     }
 }
 
-//0 -- S type, 1 -- L-type
-//for levels > 0 data is stored in `sorted_suffixes` from `beg` to (`beg` + `size`)
-void SuffixSort::sortSuffixes(std::vector <int> &data, std::vector <int> &sorted_suffixes,
-                              int level, int beg, int size){
-    if (data.size() == 1) {
-        sorted_suffixes.push_back(0); //something wrong, i can feel it
+void SuffixSort::sortSuffixes0(std::vector <int> &data, std::vector <int> &sorted_suffixes) {
+    std::vector<int> block_begin;
+    int max_symb_number = 0;
+    for (int i = 0; i < data.size(); i++) {
+        max_symb_number = std::max(data[i], max_symb_number);
+    }
+    max_symb_number++;
+
+    //calculate block start
+    block_begin.resize(max_symb_number + 1);
+    for (int i = 0; i < data.size(); i++) {
+        block_begin[data[i]]++;
+    }
+
+    int cur_pos = 0;
+    for (int i = 1; i < max_symb_number; i++) {
+        int tmp = block_begin[i];
+        block_begin[i] = cur_pos;
+        cur_pos += tmp;
+    }
+    block_begin[max_symb_number] = cur_pos;
+
+    int lms_n = putLMS0(data, block_begin, sorted_suffixes, max_symb_number);
+    inducedSort0(data, block_begin, sorted_suffixes,
+                 max_symb_number, true);
+
+    formNewString0(data, sorted_suffixes, lms_n);
+    sortSuffixes1(sorted_suffixes, data.size() - lms_n, data.size());
+
+    //put all lms-suffixes in the beginning of the `sorted_suffixes` in the right order
+    //suffix array is stored from 0 to lms_n
+
+    //at first store all lms-suffixes in the `sorted_suffixes` from lms_n to 2 * lms_n
+    int n = data.size();
+    //current position for lms-suffix
+    int last_pos = lms_n * 2 - 1;
+    int last_type = 0, cur_type;
+    for (int i = (int) data.size() - 2; i >= 0; i--) {
+        if (data[i] == data[i + 1]) {
+            cur_type = last_type;
+        } else {
+            if (data[i] < data[i + 1]) {
+                cur_type = 0;
+            } else {
+                cur_type = 1;
+            }
+        }
+        if (cur_type == 1 && last_type == 0) {
+            sorted_suffixes[last_pos--] = i + 1;
+        }
+        last_type = cur_type;
+    }
+
+    //put all lms-suffixes in the right places in `sorted_suffixes`
+    for (int i = 0; i < lms_n; i++) {
+        //let j = sorted_suffixes[i]
+        //sorted_suffixes[lms_n + j] -- index of the lms-suffix number j
+        sorted_suffixes[i] = sorted_suffixes[lms_n + sorted_suffixes[i]];
+    }
+
+    putSortedLMS0(data, block_begin, sorted_suffixes, max_symb_number, lms_n);
+    inducedSort0(data, block_begin, sorted_suffixes, max_symb_number, false);
+}
+
+void SuffixSort::sortSuffixes1(std::vector <int> &sorted_suffixes, int beg, int size){
+    if (size == 1) {
+        sorted_suffixes[0] = 0;
         return;
     }
-    std::vector <int> block_begin;
-    if (level == 0) {
-        int max_symb_number = 0;
-        for (int i = 0; i < data.size(); i++) {
-            max_symb_number = std::max(data[i], max_symb_number);
-        }
-        max_symb_number++;
-
-        //calculate block start
-        block_begin.resize(max_symb_number + 1);
-        for (int i = 0; i < data.size(); i++) {
-            block_begin[data[i]]++;
-        }
-
-        int cur_pos = 0;
-        for (int i = 1; i < max_symb_number; i++) {
-            int tmp = block_begin[i];
-            block_begin[i] = cur_pos;
-            cur_pos += tmp;
-        }
-        block_begin[max_symb_number] = cur_pos;
-
-        int lms_n = putLMS0(data, block_begin, sorted_suffixes, max_symb_number);
-        inducedSort0(data, block_begin, sorted_suffixes,
-                          max_symb_number, true);
-
-        formNewString0(data, sorted_suffixes, lms_n);
-        sortSuffixes(data, sorted_suffixes, 1, data.size() - lms_n, data.size());
-
-        //put all lms-suffixes in the beginning of the `sorted_suffixes` in the right order
-        //suffix array is stored from 0 to lms_n
-
-        //at first store all lms-suffixes in the `sorted_suffixes` from lms_n to 2 * lms_n
-        int n = data.size();
-        //current position for lms-suffix
-        int last_pos = lms_n * 2 - 1;
-        int last_type = 0, cur_type;
-        for (int i = (int)data.size() - 2; i >= 0; i--) {
-            if (data[i] == data[i + 1]) {
-                cur_type = last_type;
-            }
-            else {
-                if (data[i] < data[i + 1]) {
-                    cur_type = 0;
-                }
-                else {
-                    cur_type = 1;
-                }
-            }
-            if (cur_type == 1 && last_type == 0) {
-                sorted_suffixes[last_pos--] = i + 1;
-            }
-            last_type = cur_type;
-        }
-
-        //put all lms-suffixes in the right places in `sorted_suffixes`
-        for (int i = 0; i < lms_n; i++) {
-            //let j = sorted_suffixes[i]
-            //sorted_suffixes[lms_n + j] -- index of the lms-suffix number j
-            sorted_suffixes[i] = sorted_suffixes[lms_n + sorted_suffixes[i]];
-        }
-
-        putSortedLMS0(data, block_begin, sorted_suffixes, max_symb_number, lms_n);
-        inducedSort0(data, block_begin, sorted_suffixes, max_symb_number, false);
+    for (int i = 0; i < size; i++) {
+        sorted_suffixes[i] = EMPTY;
     }
-    else {
-        for (int i = 0; i < size; i++) {
-            sorted_suffixes[i] = EMPTY;
-        }
-        int lms_n = putLMS1(sorted_suffixes, beg, size);
-        inducedSort1(sorted_suffixes, lms_n, beg, size);
+    int lms_n = putLMS1(sorted_suffixes, beg, size);
+    inducedSort1(sorted_suffixes, lms_n, beg, size);
 
-        //TODO sort lms substrings
+    //TODO sort lms substrings
 
-        putSortedLMS1(sorted_suffixes, lms_n, beg, size);
-        inducedSort1(sorted_suffixes, lms_n, beg, size);
-    }
+    putSortedLMS1(sorted_suffixes, lms_n, beg, size);
+    inducedSort1(sorted_suffixes, lms_n, beg, size);
 }
 
 int SuffixSort::putLMS0(std::vector<int> &data, std::vector<int> &block_begin,
