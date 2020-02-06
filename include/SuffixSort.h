@@ -9,7 +9,7 @@ public:
     void sort(std::vector <int> &data, std::vector <int> &sorted_suffixes);
 
 private:
-    //SA-IS algorithm
+    //SACA-K algorithm
     void sortSuffixes(std::vector <int> &data, std::vector <int> &sorted_suffixes,
                       int level, int beg, int size);
 
