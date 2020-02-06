@@ -1,0 +1,1 @@
+O(n) time suffix array constructing algorithm for constant alphabets with O(1) additional memory.
