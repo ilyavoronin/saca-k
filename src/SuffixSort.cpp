@@ -395,14 +395,12 @@ void SuffixSort::putSortedLMS1(std::vector<int> &sorted_suffixes,
 
 }
 
-void SuffixSort::inducedSort1(std::vector<int> &sorted_suffixes, int lms_n,
+void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes, int lms_n,
                                    int beg, int size) {
-    for (int i = lms_n; i < size; i++) {
-        sorted_suffixes[i] = EMPTY;
-    }
 
-    //put lms-suffixes in there places
-    for (int i = lms_n - 1; i >= 0; i--) {
+}
 
-    }
+void SuffixSort::inducedSort1S(std::vector<int> &sorted_suffixes, int lms_n,
+                               int beg, int size) {
+
 }

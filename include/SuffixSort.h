@@ -51,10 +51,15 @@ private:
     void putSortedLMS1(std::vector <int> &sorted_suffixes,
                       int lms_n, int beg, int size);
 
-    //sort suffixes if `lms_suffixes` has been sorted for level > 0
+    //sort L-suffixes if `lms_suffixes` has been sorted for level > 0
     //data is stored in sorted_suffixes from `beg` to (`beg` + `size`)
-    void inducedSort1(std::vector <int> &sorted_suffixes,
+    void inducedSort1L(std::vector <int> &sorted_suffixes,
                       int lms_n, int beg, int size);
+
+    //sort S-suffixes if `lms_suffixes` has been sorted for level > 0
+    //data is stored in sorted_suffixes from `beg` to (`beg` + `size`)
+    void inducedSort1S(std::vector <int> &sorted_suffixes,
+                       int lms_n, int beg, int size);
 
     int EMPTY = INT_MIN;
 };
