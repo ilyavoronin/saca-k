@@ -54,12 +54,12 @@ private:
     //sort L-suffixes if `lms_suffixes` has been sorted for level > 0
     //data is stored in sorted_suffixes from `beg` to (`beg` + `size`)
     void inducedSort1L(std::vector <int> &sorted_suffixes,
-                      int lms_n, int beg, int size);
+                      int lms_n, int beg, int size, bool sort_lms_substrings);
 
     //sort S-suffixes if `lms_suffixes` has been sorted for level > 0
     //data is stored in sorted_suffixes from `beg` to (`beg` + `size`)
     void inducedSort1S(std::vector <int> &sorted_suffixes,
-                       int lms_n, int beg, int size);
+                       int lms_n, int beg, int size, bool sort_lms_substring);
 
     int EMPTY = INT_MIN;
 };
