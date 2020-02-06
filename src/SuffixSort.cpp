@@ -86,12 +86,14 @@ void SuffixSort::sortSuffixes1(std::vector <int> &sorted_suffixes, int beg, int 
         sorted_suffixes[i] = EMPTY;
     }
     int lms_n = putLMS1(sorted_suffixes, beg, size);
-    inducedSort1(sorted_suffixes, lms_n, beg, size);
+    inducedSort1L(sorted_suffixes, lms_n, beg, size);
+    inducedSort1S(sorted_suffixes, lms_n, beg, size);
 
     //TODO sort lms substrings
 
     putSortedLMS1(sorted_suffixes, lms_n, beg, size);
-    inducedSort1(sorted_suffixes, lms_n, beg, size);
+    inducedSort1L(sorted_suffixes, lms_n, beg, size);
+    inducedSort1L(sorted_suffixes, lms_n, beg, size);
 }
 
 int SuffixSort::putLMS0(std::vector<int> &data, std::vector<int> &block_begin,
@@ -316,18 +318,18 @@ int SuffixSort::putLMS1(std::vector<int> &sorted_suffixes, int beg, int size) {
             lms_n++;
             int block_end = sorted_suffixes[i];
             if (block_end == 0) {
-                sorted_suffixes[block_end] = sorted_suffixes[i];
+                sorted_suffixes[block_end] = i;
                 continue;
             }
             if (sorted_suffixes[block_end] == EMPTY) {
                 if (sorted_suffixes[block_end - 1] == EMPTY) {
-                    sorted_suffixes[block_end - 1] = sorted_suffixes[i];
+                    sorted_suffixes[block_end - 1] = i;
                     //-sorted_suffixes[j] shows how many elements(+1) have been already stored
                     sorted_suffixes[block_end] = -2;
                 }
                 else {
                     //sorted_suffixes[i] is the only element in it's block
-                    sorted_suffixes[block_end] = sorted_suffixes[i];
+                    sorted_suffixes[block_end] = i;
                 }
             }
             else if(sorted_suffixes[block_end] < 0) {
@@ -335,7 +337,7 @@ int SuffixSort::putLMS1(std::vector<int> &sorted_suffixes, int beg, int size) {
                 //points to the free space in the block
                 int k = block_end + sorted_suffixes[block_end]; //in fact the value subtracts
                 if (sorted_suffixes[k] == EMPTY) {
-                    sorted_suffixes[k] = sorted_suffixes[i];
+                    sorted_suffixes[k] = i;
                     //increase the element counter
                     sorted_suffixes[block_end]--;
                 } else {
@@ -344,7 +346,7 @@ int SuffixSort::putLMS1(std::vector<int> &sorted_suffixes, int beg, int size) {
                     for (int u = k + 1; u <= block_end; u++) {
                         std::swap(prev_elem, sorted_suffixes[u]);
                     }
-                    sorted_suffixes[k + 1] = sorted_suffixes[i];
+                    sorted_suffixes[k + 1] = i;
                 }
             } else { //sorted_suffixes[block_end] >= 0
                 //then sorted_suffixes[block_end] is value from another block and
@@ -359,13 +361,13 @@ int SuffixSort::putLMS1(std::vector<int> &sorted_suffixes, int beg, int size) {
 
                 //then perform the same action as in the first case
                 if (sorted_suffixes[block_end - 1] == EMPTY) {
-                    sorted_suffixes[block_end - 1] = sorted_suffixes[i];
+                    sorted_suffixes[block_end - 1] = i;
                     //-sorted_suffixes[j] shows how many elements(+1) have been already stored
                     sorted_suffixes[block_end] = -2;
                 }
                 else {
                     //sorted_suffixes[i] is the only element in it's block
-                    sorted_suffixes[block_end] = sorted_suffixes[i];
+                    sorted_suffixes[block_end] = i;
                 }
             }
         }
@@ -397,7 +399,13 @@ void SuffixSort::putSortedLMS1(std::vector<int> &sorted_suffixes,
 
 void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes, int lms_n,
                                    int beg, int size) {
+    for (int i = 0; i < size; i++) {
+        int j = sorted_suffixes[i];
+        if (j == EMPTY) {
+            continue;
+        }
 
+    }
 }
 
 void SuffixSort::inducedSort1S(std::vector<int> &sorted_suffixes, int lms_n,
