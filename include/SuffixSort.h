@@ -70,6 +70,7 @@ private:
     void putLMSToBegin1(std::vector <int> &sorted_suffixes, int lms_n, int beg, int size);
 
     int EMPTY = INT_MIN;
+    friend class SortTests;
 };
 
 
