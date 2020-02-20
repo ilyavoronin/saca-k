@@ -38,9 +38,12 @@ private:
                      int max_symb_number,
                      bool sort_lms_strings);
 
-    void formNewString0(std::vector <int> &data,
+    //return the number of distinct values in new string
+    int formNewString0(std::vector <int> &data,
                        std::vector <int> &sorted_suffixes,
                        int lms_n);
+
+    void putLMSToBegin0(std::vector <int> &data, std::vector <int> &sorted_suffixes, int lms_n);
 
     //put LMS suffixes that hasn't been sorted in their blocks(level 1)
     //return number of lms suffixes
@@ -60,6 +63,11 @@ private:
     //data is stored in sorted_suffixes from `beg` to (`beg` + `size`)
     void inducedSort1S(std::vector <int> &sorted_suffixes,
                        int lms_n, int beg, int size, bool sort_lms_substring);
+
+    //return the number of distinct values in the new string
+    int formNewString1(std::vector <int> &sorted_suffixes, int lms_n, int begin, int size);
+
+    void putLMSToBegin1(std::vector <int> &sorted_suffixes, int lms_n, int beg, int size);
 
     int EMPTY = INT_MIN;
 };
