@@ -86,14 +86,14 @@ void SuffixSort::sortSuffixes1(std::vector <int> &sorted_suffixes, int beg, int 
         sorted_suffixes[i] = EMPTY;
     }
     int lms_n = putLMS1(sorted_suffixes, beg, size);
-    inducedSort1L(sorted_suffixes, lms_n, beg, size);
-    inducedSort1S(sorted_suffixes, lms_n, beg, size);
+    inducedSort1L(sorted_suffixes, lms_n, beg, size, true);
+    inducedSort1S(sorted_suffixes, lms_n, beg, size, true);
 
     //TODO sort lms substrings
 
     putSortedLMS1(sorted_suffixes, lms_n, beg, size);
-    inducedSort1L(sorted_suffixes, lms_n, beg, size);
-    inducedSort1L(sorted_suffixes, lms_n, beg, size);
+    inducedSort1L(sorted_suffixes, lms_n, beg, size, false);
+    inducedSort1L(sorted_suffixes, lms_n, beg, size, false);
 }
 
 int SuffixSort::putLMS0(std::vector<int> &data, std::vector<int> &block_begin,
@@ -405,8 +405,8 @@ void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes, int lms_n,
             continue;
         }
         //just reminding that data is stored in sorted_suffixes
-        if (sorted_suffixes[j - 1] > sorted_suffixes[j]) {
-            //then j - 1 is lms-suffix and we want to store it in sorted_suffixes
+        if (sorted_suffixes[j - 1] >= sorted_suffixes[j]) {
+            //then j - 1 is l-suffix and we want to store it in sorted_suffixes
             int block_begin = sorted_suffixes[j - 1];
             if (sorted_suffixes[block_begin] == EMPTY) {
                 if (sorted_suffixes[block_begin + 1] == EMPTY) {
@@ -459,14 +459,24 @@ void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes, int lms_n,
                 }
             }
 
-            //if sorted_suffixes[i] is lms we need to make it EMPTY
-            //so when we will sort S-suffixes, the whole block will be EMPTY
-            //TODO
-            if (sort_lms_substrings) {
+            //if sorted_suffixes[i](= j) is lms(<=> not l-type) we need to make it EMPTY
+            //so when we will sort S-suffixes, the whole S-block will be EMPTY
+            j = sorted_suffixes[i]; //just a reminder
+            //isL1 and isL2 is conditions that guarantee that j is l-type(i.e. (j is l-type) = isL1 | isL2)
+            //if j == beg + size - 1 then j is the last symbol index, and last symbol is lms-type
+            bool isL1 = j != (beg + size - 1) && sorted_suffixes[j] > sorted_suffixes[j + 1];
+            //j and j + 1 is stored in the same block,
+            //if (j + 1) is l-type then sorted_suffixes[j + 1] points to the begin of the block and therefore < i
+            //if (j + 1) is lms-type then sorted_suffixes[j + 1] points to the end of the block and therefore > i
+            bool isL2 = j != (beg + size - 1) && sorted_suffixes[j] == sorted_suffixes[j + 1] && sorted_suffixes[j + 1] < i;
+            if (isL1 || isL2) {
                 sorted_suffixes[i] = EMPTY;
             }
             //Also if we are sorting lms-substrings we don't need L-suffixes
             //except the most left one
+            if (sort_lms_substrings) {
+                sorted_suffixes[i] = EMPTY;
+            }
         }
     }
 
@@ -490,5 +500,87 @@ void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes, int lms_n,
 
 void SuffixSort::inducedSort1S(std::vector<int> &sorted_suffixes, int lms_n,
                                int beg, int size, bool sort_lms_substrings) {
+    //TODO check if when we shifting blocks we don't move sorted_suffixes[i]
+    for (int i = size - 1; i >= 0; i--) {
+        int j = sorted_suffixes[i];
+        if (sorted_suffixes[j - 1] < sorted_suffixes[j] ||
+                (sorted_suffixes[j - 1] == sorted_suffixes[j] && sorted_suffixes[j - 1] > i)) {
+            //then (j - 1) is s-suffix and we need to find position for it
+            //sorted_suffixes[i] points to the end of it's block
+            int block_end = sorted_suffixes[i];
+            if (block_end == 0) {
+                sorted_suffixes[block_end] = i;
+                continue;
+            }
+            if (sorted_suffixes[block_end] == EMPTY) {
+                if (sorted_suffixes[block_end - 1] == EMPTY) {
+                    sorted_suffixes[block_end - 1] = j - 1;
+                    //-sorted_suffixes[block_end] shows how many elements(+1) have been already stored
+                    sorted_suffixes[block_end] = -2;
+                }
+                else {
+                    //j - 1 is the only element in it's block
+                    sorted_suffixes[block_end] = j - 1;
+                }
+            }
+            else if(sorted_suffixes[block_end] < 0) {
+                //TODO make sure that k >= 0
+                //points to the free space in the block
+                int k = block_end + sorted_suffixes[block_end]; //in fact the value subtracts
+                if (sorted_suffixes[k] == EMPTY) {
+                    sorted_suffixes[k] = j - 1;
+                    //increase the element counter
+                    sorted_suffixes[block_end]--;
+                } else {
+                    //block is full, we need to shift the elements to the right
+                    int prev_elem = EMPTY;
+                    for (int u = k + 1; u <= block_end; u++) {
+                        std::swap(prev_elem, sorted_suffixes[u]);
+                    }
+                    sorted_suffixes[k + 1] = j - 1;
+                }
+            } else { //sorted_suffixes[block_end] >= 0
+                //then sorted_suffixes[block_end] is value from another block and
+                //we should shift that block to the right
+                int k = block_end;
+                //while sorted_suffixes[k] is not counter
+                int last_value = EMPTY;
+                while (sorted_suffixes[k] >= 0) {
+                    std::swap(sorted_suffixes[k], last_value);
+                    k++;
+                }
 
+                //then perform the same action as in the first case
+                if (sorted_suffixes[block_end - 1] == EMPTY) {
+                    sorted_suffixes[block_end - 1] = j - 1;
+                    //-sorted_suffixes[block_end] shows how many elements(+1) have been already stored
+                    sorted_suffixes[block_end] = -2;
+                }
+                else {
+                    //j - 1 is the only element in it's block
+                    sorted_suffixes[block_end] = j - 1;
+                }
+            }
+        }
+        //if we are sorting lms-substrings we need o
+        if (sort_lms_substrings) {
+            sorted_suffixes[i] = EMPTY;
+        }
+    }
+    //now we need to shift right all the values in the block,
+    //if the block still has counter
+    int i = size - 1;
+    while (i >= 0) {
+        if (sorted_suffixes[i] < 0 && sorted_suffixes[i] != EMPTY) {
+            //then sorted_suffixes[i] is a counter
+            int j = i;
+            i = i + sorted_suffixes[i];
+            while (j > i) {
+                sorted_suffixes[j] = sorted_suffixes[j - 1];
+                sorted_suffixes[j - 1] = EMPTY;
+                j--;
+            }
+        }
+        i--;
+    }
 }
