@@ -392,7 +392,7 @@ int SuffixSort::putLMS1(std::vector<int> &sorted_suffixes, int beg, int size) {
                 int k = block_end;
                 //while sorted_suffixes[k] is not counter
                 int last_value = EMPTY;
-                while (sorted_suffixes[k] >= 0) {
+                while (sorted_suffixes[k] >= 0 || sorted_suffixes[k] == EMPTY) {
                     std::swap(sorted_suffixes[k], last_value);
                     k++;
                 }
@@ -418,12 +418,12 @@ int SuffixSort::putLMS1(std::vector<int> &sorted_suffixes, int beg, int size) {
         if (sorted_suffixes[i] < 0 && sorted_suffixes[i] != EMPTY) {
             //then sorted_suffixes[i] is a counter
             int j = i;
-            i = i + sorted_suffixes[i];
+            i = i + sorted_suffixes[i] + 1;
             while (j > i) {
                 sorted_suffixes[j] = sorted_suffixes[j - 1];
-                sorted_suffixes[j - 1] = EMPTY;
                 j--;
             }
+            sorted_suffixes[j] = EMPTY;
         }
         i--;
     }
@@ -448,7 +448,7 @@ void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes,
                                    int beg, int size, bool sort_lms_substrings) {
     for (int i = 0; i < size; i++) {
         int j = sorted_suffixes[i];
-        if (j < 0) {
+        if (j < 0 || j == beg) {
             continue;
         }
         int new_i = i;
@@ -495,7 +495,7 @@ void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes,
                 int k = block_begin;
                 //while sorted_suffixes[k] is not counter
                 int last_value = EMPTY;
-                while (sorted_suffixes[k] >= 0) {
+                while (sorted_suffixes[k] >= 0 || sorted_suffixes[k] == EMPTY) {
                     std::swap(sorted_suffixes[k], last_value);
                     k--;
                 }
@@ -518,7 +518,7 @@ void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes,
                 }
             }
 
-            //further we take into account if we've shifted the i-th element
+            //further we take into account, if we've shifted the i-th element
             i = new_i;
 
             //if sorted_suffixes[i](= j) is lms(<=> not l-type) we need to make it EMPTY
@@ -534,7 +534,7 @@ void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes,
             if (isL1 || isL2) {
                 sorted_suffixes[i] = EMPTY;
             }
-            //Also if we are sorting lms-substrings we don't need L-suffixes
+            //Also if we are sorting lms-substrings we don't need L-suffixes and LMS-suffixes
             //except the most left one
             if (sort_lms_substrings) {
                 sorted_suffixes[i] = EMPTY;
@@ -549,12 +549,12 @@ void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes,
         if (sorted_suffixes[i] < 0 && sorted_suffixes[i] != EMPTY) {
             //then sorted_suffixes[i] is a counter
             int j = i;
-            i = i - sorted_suffixes[i];
+            i = i - sorted_suffixes[i] - 1;
             while (j < i) {
                 sorted_suffixes[j] = sorted_suffixes[j + 1];
-                sorted_suffixes[j + 1] = EMPTY;
                 j++;
             }
+            sorted_suffixes[j] = EMPTY;
         }
         i++;
     }
@@ -562,18 +562,24 @@ void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes,
 
 void SuffixSort::inducedSort1S(std::vector<int> &sorted_suffixes,
                                int beg, int size, bool sort_lms_substrings) {
-    //TODO check if when we shifting blocks we don't move sorted_suffixes[i]
     for (int i = size - 1; i >= 0; i--) {
+        int new_i = i;
         int j = sorted_suffixes[i];
+        if (j < 0) {
+            continue;
+        }
+        if (j == beg) {
+            if (sort_lms_substrings) {
+                //we never delete the first element, but it is not lms
+                sorted_suffixes[i] = EMPTY;
+            }
+            continue;
+        }
         if (sorted_suffixes[j - 1] < sorted_suffixes[j] ||
                 (sorted_suffixes[j - 1] == sorted_suffixes[j] && sorted_suffixes[j - 1] > i)) {
             //then (j - 1) is s-suffix and we need to find position for it
             //sorted_suffixes[i] points to the end of it's block
-            int block_end = sorted_suffixes[i];
-            if (block_end == 0) {
-                sorted_suffixes[block_end] = i;
-                continue;
-            }
+            int block_end = sorted_suffixes[j - 1];
             if (sorted_suffixes[block_end] == EMPTY) {
                 if (sorted_suffixes[block_end - 1] == EMPTY) {
                     sorted_suffixes[block_end - 1] = j - 1;
@@ -585,8 +591,7 @@ void SuffixSort::inducedSort1S(std::vector<int> &sorted_suffixes,
                     sorted_suffixes[block_end] = j - 1;
                 }
             }
-            else if(sorted_suffixes[block_end] < 0) {
-                //TODO make sure that k >= 0
+            else if(sorted_suffixes[block_end] != EMPTY && sorted_suffixes[block_end] < 0) {
                 //points to the free space in the block
                 int k = block_end + sorted_suffixes[block_end]; //in fact the value subtracts
                 if (sorted_suffixes[k] == EMPTY) {
@@ -599,6 +604,12 @@ void SuffixSort::inducedSort1S(std::vector<int> &sorted_suffixes,
                     for (int u = k + 1; u <= block_end; u++) {
                         std::swap(prev_elem, sorted_suffixes[u]);
                     }
+                    if (sorted_suffixes[j - 1] == sorted_suffixes[j]) {
+                        //in this case index j(=sorted_suffixes[i]) is also s-type
+                        //and is stored in the same block and we've shifted all the block to the left
+                        //so the we don't need to increment `i` in the for cycle
+                        new_i = i + 1;
+                    }
                     sorted_suffixes[k + 1] = j - 1;
                 }
             } else { //sorted_suffixes[block_end] >= 0
@@ -607,9 +618,15 @@ void SuffixSort::inducedSort1S(std::vector<int> &sorted_suffixes,
                 int k = block_end;
                 //while sorted_suffixes[k] is not counter
                 int last_value = EMPTY;
-                while (sorted_suffixes[k] >= 0) {
+                while (sorted_suffixes[k] >= 0 || sorted_suffixes[k] == EMPTY) {
                     std::swap(sorted_suffixes[k], last_value);
                     k++;
+                }
+                sorted_suffixes[k] = last_value;
+                if (k > i) {
+                    //sorted_suffixes[j - 1] <= sorted_suffixes[j] and then `i` > sorted_suffixes[j - 1]
+                    //and if k > i then we've shifted i to the right
+                    new_i = i + 1;
                 }
 
                 //then perform the same action as in the first case
@@ -623,10 +640,12 @@ void SuffixSort::inducedSort1S(std::vector<int> &sorted_suffixes,
                     sorted_suffixes[block_end] = j - 1;
                 }
             }
-        }
-        //if we are sorting lms-substrings we need o
-        if (sort_lms_substrings) {
-            sorted_suffixes[i] = EMPTY;
+            i = new_i;
+
+            //if we are sorting lms-substrings we need to leave only lms indexes
+            if (sort_lms_substrings) {
+                sorted_suffixes[i] = EMPTY;
+            }
         }
     }
     //now we need to shift right all the values in the block,
@@ -636,14 +655,19 @@ void SuffixSort::inducedSort1S(std::vector<int> &sorted_suffixes,
         if (sorted_suffixes[i] < 0 && sorted_suffixes[i] != EMPTY) {
             //then sorted_suffixes[i] is a counter
             int j = i;
-            i = i + sorted_suffixes[i];
+            i = i + sorted_suffixes[i] + 1;
             while (j > i) {
                 sorted_suffixes[j] = sorted_suffixes[j - 1];
-                sorted_suffixes[j - 1] = EMPTY;
                 j--;
             }
+            sorted_suffixes[j] = EMPTY;
         }
         i--;
+    }
+
+    if (sort_lms_substrings) {
+        //we delete the last lms index earlier
+        sorted_suffixes[0] = beg + size - 1;
     }
 
     if (sort_lms_substrings) {
@@ -653,9 +677,12 @@ void SuffixSort::inducedSort1S(std::vector<int> &sorted_suffixes,
         //we want to move all the lms-suffixes to the front
         int j = 0;
         for (int i = 0; i < size; i++) {
-            if (sorted_suffixes[i] ) {
-                sorted_suffixes[j++] = sorted_suffixes[i];
-                sorted_suffixes[i] = EMPTY;
+            if (sorted_suffixes[i] != EMPTY) {
+                sorted_suffixes[j] = sorted_suffixes[i];
+                if (j != i) {
+                    sorted_suffixes[i] = EMPTY;
+                }
+                j++;
             }
         }
     }
