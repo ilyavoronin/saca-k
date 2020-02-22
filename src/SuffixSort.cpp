@@ -6,7 +6,7 @@ void SuffixSort::sort(std::vector <int> &data, std::vector <int> &sorted_suffixe
         data[i]++;
     }
     data.push_back(0);
-    sorted_suffixes.resize(data.size());
+    sorted_suffixes.resize(data.size(), -1);
     sortSuffixes0(data, sorted_suffixes);
     for (int i = 0; i < (int)data.size() - 1; i++) {
         data[i]--;
@@ -48,6 +48,9 @@ void SuffixSort::sortSuffixes0(std::vector <int> &data, std::vector <int> &sorte
         }
     }
     else {
+        for (int i = 0; i < (int)data.size() - lms_n; i++) {
+            sorted_suffixes[i] = EMPTY;
+        }
         sortSuffixes1(sorted_suffixes, data.size() - lms_n, data.size());
     }
 
@@ -64,9 +67,7 @@ void SuffixSort::sortSuffixes1(std::vector <int> &sorted_suffixes, int beg, int 
         sorted_suffixes[0] = 0;
         return;
     }
-    for (int i = 0; i < size; i++) {
-        sorted_suffixes[i] = EMPTY;
-    }
+
     int lms_n = putLMS1(sorted_suffixes, beg, size);
     inducedSort1L(sorted_suffixes, lms_n, beg, size, true);
     inducedSort1S(sorted_suffixes, lms_n, beg, size, true);
@@ -173,6 +174,8 @@ void SuffixSort::inducedSort0(std::vector <int> &data,
             }
         }
     }
+    //if sort_lms_substring == true, then we've deleted it, but we need it further
+    sorted_suffixes[0] = data.size() - 1;
 
     //find positions for S-suffixes
     cur_shift.assign(max_symb_number, 0);
@@ -191,6 +194,10 @@ void SuffixSort::inducedSort0(std::vector <int> &data,
             if (sort_lms_substrings) {
                 //we don't need this value anymore
                 sorted_suffixes[i] = -1;
+                if (j - 1 == 0) {
+                    //0 is not lms
+                    sorted_suffixes[pos] = -1;
+                }
             }
         }
     }
@@ -203,7 +210,11 @@ void SuffixSort::inducedSort0(std::vector <int> &data,
         int j = 0;
         for (int i = 0; i < (int)sorted_suffixes.size(); i++) {
             if (sorted_suffixes[i] > 0) {
-                sorted_suffixes[j++] = sorted_suffixes[i];
+                sorted_suffixes[j] = sorted_suffixes[i];
+                if (j != i) {
+                    sorted_suffixes[i] = -1;
+                }
+                j++;
             }
         }
     }
@@ -214,13 +225,13 @@ int SuffixSort::formNewString0(std::vector<int> &data, std::vector<int> &sorted_
     int block_begin = 0;
     //if we divide indexes of lms-suffix by 2, we will get different values from 0 to n / 2
     sorted_suffixes[lms_n + sorted_suffixes[0] / 2] = block_begin;
+    int prev_lms = sorted_suffixes[0];
     int prev_lms_end = sorted_suffixes[0]; // sorted_suffixes[0] is always n - 1
     int new_alph_size = 1;
     for (int i = 1; i < lms_n; i++) {
-        int i1 = sorted_suffixes[i];
-        int j1 = sorted_suffixes[i - 1];
-        //we don't know yet where lms-suffix for i1 ends
-        int k1 = i1 + 1;
+        int cur_lms = sorted_suffixes[i];
+        //we don't know yet where lms-suffix for cur_lms ends
+        int k1 = cur_lms + 1;
         int cur_lms_end;
         while (k1 < n) {
             if (data[k1] < data[k1 - 1]) {
@@ -244,14 +255,14 @@ int SuffixSort::formNewString0(std::vector<int> &data, std::vector<int> &sorted_
             cur_lms_end = n - 1;
         }
 
-        //know we can compare lms-suffixes i1 and j1
+        //know we can compare lms-suffixes cur_lms and prev_lms
         bool is_eq = true;
-        if (cur_lms_end - i1 != prev_lms_end - j1) {
+        if (cur_lms_end - cur_lms != prev_lms_end - prev_lms) {
             is_eq = false;
         }
         else {
-            for (; i1 <= cur_lms_end && j1 <= prev_lms_end; i1++, j1++) {
-                if (data[i1] != data[j1]) {
+            for (; cur_lms <= cur_lms_end && prev_lms <= prev_lms_end; cur_lms++, prev_lms++) {
+                if (data[cur_lms] != data[prev_lms]) {
                     is_eq = false;
                     break;
                 }
@@ -264,6 +275,8 @@ int SuffixSort::formNewString0(std::vector<int> &data, std::vector<int> &sorted_
             new_alph_size++;
         }
         sorted_suffixes[lms_n + sorted_suffixes[i] / 2] = block_begin;
+        prev_lms = cur_lms;
+        prev_lms_end = cur_lms_end;
     }
     sorted_suffixes[block_begin] = lms_n - 1;
 
