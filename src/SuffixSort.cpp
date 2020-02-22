@@ -69,8 +69,8 @@ void SuffixSort::sortSuffixes1(std::vector <int> &sorted_suffixes, int beg, int 
     }
 
     int lms_n = putLMS1(sorted_suffixes, beg, size);
-    inducedSort1L(sorted_suffixes, lms_n, beg, size, true);
-    inducedSort1S(sorted_suffixes, lms_n, beg, size, true);
+    inducedSort1L(sorted_suffixes, beg, size, true);
+    inducedSort1S(sorted_suffixes, beg, size, true);
 
     int n_distinct = formNewString1(sorted_suffixes, lms_n, beg, size);
     if (n_distinct == lms_n) {
@@ -86,9 +86,9 @@ void SuffixSort::sortSuffixes1(std::vector <int> &sorted_suffixes, int beg, int 
 
     putLMSToBegin1(sorted_suffixes, lms_n, beg, size);
 
-    putSortedLMS1(sorted_suffixes, lms_n, beg, size);
-    inducedSort1L(sorted_suffixes, lms_n, beg, size, false);
-    inducedSort1L(sorted_suffixes, lms_n, beg, size, false);
+    putSortedLMS1(sorted_suffixes, lms_n);
+    inducedSort1L(sorted_suffixes, beg, size, false);
+    inducedSort1L(sorted_suffixes, beg, size, false);
 }
 
 int SuffixSort::putLMS0(std::vector<int> &data, std::vector<int> &block_begin,
@@ -430,8 +430,7 @@ int SuffixSort::putLMS1(std::vector<int> &sorted_suffixes, int beg, int size) {
     return lms_n;
 }
 
-void SuffixSort::putSortedLMS1(std::vector<int> &sorted_suffixes,
-                               int lms_n, int beg, int size) {
+void SuffixSort::putSortedLMS1(std::vector<int> &sorted_suffixes, int lms_n) {
     //last position in the current block(block where we stored previous lms-index)
     int last_pos = -1;
     int last_lms_symb = -1;
@@ -445,20 +444,20 @@ void SuffixSort::putSortedLMS1(std::vector<int> &sorted_suffixes,
     }
 }
 
-void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes, int lms_n,
+void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes,
                                    int beg, int size, bool sort_lms_substrings) {
     for (int i = 0; i < size; i++) {
         int j = sorted_suffixes[i];
-        if (j == EMPTY) {
+        if (j < 0) {
             continue;
         }
-        //just reminding that data is stored in sorted_suffixes
+        int new_i = i;
         if (sorted_suffixes[j - 1] >= sorted_suffixes[j]) {
             //then j - 1 is l-suffix and we want to store it in sorted_suffixes
             int block_begin = sorted_suffixes[j - 1];
             if (sorted_suffixes[block_begin] == EMPTY) {
                 if (sorted_suffixes[block_begin + 1] == EMPTY) {
-                    sorted_suffixes[block_begin] = j - 1;
+                    sorted_suffixes[block_begin + 1] = j - 1;
                     //-sorted_suffixes[block_begin] shows how many elements(+1) have been stored
                     sorted_suffixes[block_begin] = -2;
                 }
@@ -467,7 +466,7 @@ void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes, int lms_n,
                     sorted_suffixes[block_begin] = j - 1;
                 }
             }
-            else if (sorted_suffixes[block_begin] < 0) {
+            else if (sorted_suffixes[block_begin] != EMPTY && sorted_suffixes[block_begin] < 0) {
                 //points to free position in the block
                 int k = block_begin - sorted_suffixes[block_begin]; //in fact the value is added
                 if (sorted_suffixes[k] == EMPTY) {
@@ -480,6 +479,12 @@ void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes, int lms_n,
                     int prev_elem = EMPTY;
                     for (int u = k - 1; u >= block_begin; u--) {
                         std::swap(prev_elem, sorted_suffixes[u]);
+                    }
+                    if (sorted_suffixes[j - 1] == sorted_suffixes[j]) {
+                        //in this case index `sorted_suffixes[i]` is also l-type
+                        //and is stored in the same block and we've shifted all the block to the left
+                        //so the we don't need to increment `i` in the for cycle
+                        new_i = i - 1;
                     }
                     sorted_suffixes[k - 1] = j - 1;
                 }
@@ -494,10 +499,16 @@ void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes, int lms_n,
                     std::swap(sorted_suffixes[k], last_value);
                     k--;
                 }
+                sorted_suffixes[k] = last_value;
+                if (k < i) {
+                    //in this case `i` is lms-type index and is stored to the left of the block begin
+                    //and if k < i then we shifted i-th element to the left in the while cycle
+                    new_i = i - 1;
+                }
 
                 //then perform the same action as in the first case
                 if (sorted_suffixes[block_begin + 1] == EMPTY) {
-                    sorted_suffixes[block_begin] = j - 1;
+                    sorted_suffixes[block_begin + 1] = j - 1;
                     //-sorted_suffixes[block_begin] shows how many elements(+1) have been stored
                     sorted_suffixes[block_begin] = -2;
                 }
@@ -506,6 +517,9 @@ void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes, int lms_n,
                     sorted_suffixes[block_begin] = j - 1;
                 }
             }
+
+            //further we take into account if we've shifted the i-th element
+            i = new_i;
 
             //if sorted_suffixes[i](= j) is lms(<=> not l-type) we need to make it EMPTY
             //so when we will sort S-suffixes, the whole S-block will be EMPTY
@@ -546,7 +560,7 @@ void SuffixSort::inducedSort1L(std::vector<int> &sorted_suffixes, int lms_n,
     }
 }
 
-void SuffixSort::inducedSort1S(std::vector<int> &sorted_suffixes, int lms_n,
+void SuffixSort::inducedSort1S(std::vector<int> &sorted_suffixes,
                                int beg, int size, bool sort_lms_substrings) {
     //TODO check if when we shifting blocks we don't move sorted_suffixes[i]
     for (int i = size - 1; i >= 0; i--) {
