@@ -22,6 +22,12 @@ public:
                               int lms_n) {
         SuffixSort().formNewString0(data, sorted_suffixes, lms_n);
     }
+
+    int test_putLMS1(std::vector <int> &sorted_suffixes,
+                 int beg, int size) {
+        return SuffixSort().putLMS1(sorted_suffixes, beg, size);
+    }
+    const int E = SuffixSort().EMPTY;
 };
 
 //TEST 1 begin(see test_examples.txt
@@ -65,4 +71,16 @@ TEST_F(SortTests, testFormNewString0) {
     for (int i = n - 1; i > n - 1 - lms_n; i--) {
         ASSERT_EQ(sorted_suffixes[i], expected_sorted_suffixes[i]);
     }
+}
+
+TEST_F(SortTests, testPutLMS1) {
+    std::vector <int> sorted_suffixes = {E, E, E, E, E, E, E, E, E, E, E, E, E, E, 3, 2, 4, 2, 5, 6, 7, 0};
+    int beg = 14;
+    int size = 8;
+
+    int lms_n = test_putLMS1(sorted_suffixes, beg, size);
+    std::vector <int> expected_sorted_suffixes = {21, 15, 17, E, E, E, E, E, E, E, E, E, E, E, 3, 2, 4, 2, 5, 6, 7, 0};
+
+    ASSERT_EQ(lms_n, 3);
+    ASSERT_EQ(sorted_suffixes, expected_sorted_suffixes);
 }
