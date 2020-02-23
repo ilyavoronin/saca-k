@@ -441,7 +441,8 @@ void SuffixSort::putSortedLMS1(std::vector<int> &suffix_array, int lms_n) {
             //then we put all lms-suffixes in the last block and now we switch to the new block
             last_pos = suffix_array[j]; //because suffix_array[j] points to the end of the block
         }
-        suffix_array[last_pos--] = j;
+        last_lms_symb = suffix_array[j];
+        std::swap(suffix_array[last_pos--], suffix_array[i]);
     }
 }
 
