@@ -311,7 +311,7 @@ void SuffixSort::putLMSToBegin0(std::vector <int> &data, std::vector <int> &suff
     //at first store all lms-suffixes in the `suffix_array` from lms_n to 2 * lms_n
     int n = data.size();
     //current position for lms-suffix
-    int last_pos = lms_n * 2 - 1;
+    int last_pos = n - 1;
     int last_type = 0, cur_type;
     for (int i = (int) data.size() - 2; i >= 0; i--) {
         if (data[i] == data[i + 1]) {
@@ -333,7 +333,7 @@ void SuffixSort::putLMSToBegin0(std::vector <int> &data, std::vector <int> &suff
     for (int i = 0; i < lms_n; i++) {
         //let j = suffix_array[i]
         //suffix_array[lms_n + j] -- index of the lms-suffix number j
-        suffix_array[i] = suffix_array[lms_n + suffix_array[i]];
+        suffix_array[i] = suffix_array[suffix_array[i]];
     }
 }
 

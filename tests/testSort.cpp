@@ -48,6 +48,10 @@ public:
         SuffixSort().putSortedLMS1(suffix_array, lms_n);
     }
 
+    void test_putLMSToBegin0(std::vector <int> &data, std::vector <int> &suffix_array, int lms_n) {
+        SuffixSort().putLMSToBegin0(data, suffix_array, lms_n);
+    }
+
     const int E = SuffixSort().EMPTY;
 };
 
@@ -181,6 +185,17 @@ TEST_F(SortTests, testInduceSortS) {
 
     test_inducedSort1S(suffix_array, beg, size, false);
     std::vector <int> expected_suffix_array = {21, 15, 17, 14, 16, 18, 19, 20, E, E, E, E, E, E, 3, 2, 4, 2, 5, 6, 7, 0};
+
+    ASSERT_EQ(suffix_array, expected_suffix_array);
+}
+
+TEST_F(SortTests, testPutLMSTobegin0) {
+    std::vector <int> data = {1, 2, 1, 3, 1, 2, 1, 5, 1, 2, 1, 8, 8, 8, 2, 2, 2, 7, 2, 3, 2, 0};
+    std::vector <int> suffix_array = {21, 15, 17, 14, 16, 18, 19, 20, E, E, E, E, E, E, 3, 2, 4, 2, 5, 6, 7, 0};
+    int lms_n = 8;
+
+    test_putLMSToBegin0(data, suffix_array, lms_n);
+    std::vector <int> expected_suffix_array = {21, 4, 8, 2, 6, 10, 14, 18, E, E, E, E, E, E, 2, 4, 6, 8, 10, 14, 18, 21};
 
     ASSERT_EQ(suffix_array, expected_suffix_array);
 }
