@@ -52,6 +52,13 @@ public:
         SuffixSort().putLMSToBegin0(data, suffix_array, lms_n);
     }
 
+    void test_putSortedLMS0(std::vector <int> &data,
+                            std::vector <int> &block_begin,
+                            std::vector <int> &suffix_array,
+                            int max_symb_number, int lms_n) {
+        SuffixSort().putSortedLMS0(data, block_begin, suffix_array, max_symb_number, lms_n);
+    }
+
     const int E = SuffixSort().EMPTY;
 };
 
@@ -196,6 +203,19 @@ TEST_F(SortTests, testPutLMSTobegin0) {
 
     test_putLMSToBegin0(data, suffix_array, lms_n);
     std::vector <int> expected_suffix_array = {21, 4, 8, 2, 6, 10, 14, 18, E, E, E, E, E, E, 2, 4, 6, 8, 10, 14, 18, 21};
+
+    ASSERT_EQ(suffix_array, expected_suffix_array);
+}
+
+TEST_F(SortTests, testPutSortedLMS0) {
+    std::vector <int> data = {1, 2, 1, 3, 1, 2, 1, 5, 1, 2, 1, 8, 8, 8, 2, 2, 2, 7, 2, 3, 2, 0};
+    std::vector <int> block_begin = {0, 1, 7, 15, 17, 17, 18, 18, 19, 22};
+    std::vector <int> suffix_array = {21, 4, 8, 2, 6, 10, 14, 18, E, E, E, E, E, E, 2, 4, 6, 8, 10, 14, 18, 21};
+    int max_symb_number = 9;
+    int lms_n = 8;
+
+    test_putSortedLMS0(data, block_begin, suffix_array, max_symb_number, lms_n);
+    std::vector <int> expected_suffix_array = {21, -1, 4, 8, 2, 6, 10, -1, -1, -1, -1, -1, -1, 14, 18, -1, -1, -1, -1, -1, -1, -1};
 
     ASSERT_EQ(suffix_array, expected_suffix_array);
 }

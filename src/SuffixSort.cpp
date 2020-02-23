@@ -143,10 +143,9 @@ void SuffixSort::putSortedLMS0(std::vector<int> &data, std::vector<int> &block_b
     //put lms-suffixes in their places
     for (int i = lms_n - 1; i >= 0; i--) {
         int symb = data[suffix_array[i]];
-        int pos = block_begin[symb + 1] -cur_shift[symb] - 1;
-        suffix_array[pos] = suffix_array[i];
+        int pos = block_begin[symb + 1] - cur_shift[symb] - 1;
+        std::swap(suffix_array[pos], suffix_array[i]);
         cur_shift[symb]++;
-        suffix_array[i] = -1;
     }
 }
 
