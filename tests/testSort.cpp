@@ -216,3 +216,25 @@ TEST_F(SortTests, testPutSortedLMS0) {
 
     ASSERT_EQ(suffix_array, expected_suffix_array);
 }
+
+TEST_F(SortTests, testInducedSort0) {
+    std::vector <int> data = {1, 2, 1, 3, 1, 2, 1, 5, 1, 2, 1, 8, 8, 8, 2, 2, 2, 7, 2, 3, 2, 0};
+    std::vector <int> block_begin = {0, 1, 7, 15, 17, 17, 18, 18, 19, 22};
+    std::vector <int> suffix_array = {21, E, 4, 8, 2, 6, 10, E, E, E, E, E, E, 14, 18, E, E, E, E, E, E, E};
+    int max_symb_number = 9;
+
+    test_inducedSort0(data, block_begin, suffix_array, max_symb_number, false);
+    std::vector <int> expected_suffix_array = {21, 0, 4, 8, 2, 6, 10, 20, 1, 5, 9, 14, 15, 18, 16, 3, 19, 7, 17, 13, 12, 11};
+
+    ASSERT_EQ(suffix_array, expected_suffix_array);
+}
+
+TEST_F(SortTests, testAll) {
+    std::vector <int> data = {0, 1, 0, 2, 0, 1, 0, 4, 0, 1, 0, 7, 7, 7, 1, 1, 1, 6, 1, 2, 1};
+    std::vector <int> suffix_array;
+
+    SuffixSort().build_suffix_array(data, suffix_array);
+    std::vector <int> expected_suffix_array = {0, 4, 8, 2, 6, 10, 20, 1, 5, 9, 14, 15, 18, 16, 3, 19, 7, 17, 13, 12, 11};
+
+    ASSERT_EQ(suffix_array, expected_suffix_array);
+}

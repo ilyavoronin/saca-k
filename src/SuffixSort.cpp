@@ -2,13 +2,18 @@
 
 
 void SuffixSort::build_suffix_array(std::vector <int> &data, std::vector <int> &suffix_array) {
-    for (int i = 0; i < (int)data.size() - 1; i++) {
+    for (int i = 0; i < (int)data.size(); i++) {
         data[i]++;
     }
     data.push_back(0);
     suffix_array.resize(data.size(), EMPTY);
     sortSuffixes0(data, suffix_array);
-    for (int i = 0; i < (int)data.size() - 1; i++) {
+    data.pop_back();
+    for (int i = 0; i < (int)suffix_array.size() - 1; i++) {
+        suffix_array[i] = suffix_array[i + 1];
+    }
+    suffix_array.pop_back();
+    for (int i = 0; i < (int)data.size(); i++) {
         data[i]--;
     }
 }
@@ -28,7 +33,7 @@ void SuffixSort::sortSuffixes0(std::vector <int> &data, std::vector <int> &suffi
     }
 
     int cur_pos = 0;
-    for (int i = 1; i < max_symb_number; i++) {
+    for (int i = 0; i < max_symb_number; i++) {
         int tmp = block_begin[i];
         block_begin[i] = cur_pos;
         cur_pos += tmp;
@@ -48,7 +53,7 @@ void SuffixSort::sortSuffixes0(std::vector <int> &data, std::vector <int> &suffi
         }
     }
     else {
-        sortSuffixes1(suffix_array, data.size() - lms_n, data.size());
+        sortSuffixes1(suffix_array, data.size() - lms_n, lms_n);
     }
 
     //put all lms-suffixes in the beginning of the `suffix_array` in the right order
@@ -60,11 +65,6 @@ void SuffixSort::sortSuffixes0(std::vector <int> &data, std::vector <int> &suffi
 }
 
 void SuffixSort::sortSuffixes1(std::vector <int> &suffix_array, int beg, int size){
-    if (size == 1) {
-        suffix_array[0] = 0;
-        return;
-    }
-
     int lms_n = putLMS1(suffix_array, beg, size);
     inducedSort1L(suffix_array, beg, size, true);
     inducedSort1S(suffix_array, beg, size, true);
@@ -167,7 +167,7 @@ void SuffixSort::inducedSort0(std::vector <int> &data,
             }
         }
     }
-    //if sort_lms_substring == true, then we've deleted it, but we need it further
+    //we've deleted the last lms-index, but we need it further
     suffix_array[0] = data.size() - 1;
 
     //find positions for S-suffixes
