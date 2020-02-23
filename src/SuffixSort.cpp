@@ -6,7 +6,7 @@ void SuffixSort::build_suffix_array(std::vector <int> &data, std::vector <int> &
         data[i]++;
     }
     data.push_back(0);
-    suffix_array.resize(data.size(), -1);
+    suffix_array.resize(data.size(), EMPTY);
     sortSuffixes0(data, suffix_array);
     for (int i = 0; i < (int)data.size() - 1; i++) {
         data[i]--;
@@ -48,9 +48,6 @@ void SuffixSort::sortSuffixes0(std::vector <int> &data, std::vector <int> &suffi
         }
     }
     else {
-        for (int i = 0; i < (int)data.size() - lms_n; i++) {
-            suffix_array[i] = EMPTY;
-        }
         sortSuffixes1(suffix_array, data.size() - lms_n, data.size());
     }
 
@@ -135,9 +132,6 @@ int SuffixSort::putLMS0(std::vector<int> &data, std::vector<int> &block_begin,
 void SuffixSort::putSortedLMS0(std::vector<int> &data, std::vector<int> &block_begin,
                                std::vector<int> &suffix_array,
                                int max_symb_number, int lms_n) {
-    for (int i = lms_n; i < suffix_array.size(); i++) {
-        suffix_array[i] = -1;
-    }
     std::vector<int> cur_shift(max_symb_number, 0);
 
     //put lms-suffixes in their places
@@ -169,7 +163,7 @@ void SuffixSort::inducedSort0(std::vector <int> &data,
             cur_shift[symb]++;
             if (sort_lms_substrings) {
                 //we don't need this value anymore
-                suffix_array[i] = -1;
+                suffix_array[i] = EMPTY;
             }
         }
     }
@@ -192,10 +186,10 @@ void SuffixSort::inducedSort0(std::vector <int> &data,
             cur_shift[symb]++;
             if (sort_lms_substrings) {
                 //we don't need this value anymore
-                suffix_array[i] = -1;
+                suffix_array[i] = EMPTY;
                 if (j - 1 == 0) {
                     //0 is not lms
-                    suffix_array[pos] = -1;
+                    suffix_array[pos] = EMPTY;
                 }
             }
         }
@@ -204,16 +198,12 @@ void SuffixSort::inducedSort0(std::vector <int> &data,
     if (sort_lms_substrings) {
         //now indexes that corresponds to the lms-suffixes are stored
         //in `suffix_array` in the right order,
-        //and other values is set to -1
+        //and other values is set to EMPTY
         //we want to move all the lms-suffixes to the front
         int j = 0;
         for (int i = 0; i < (int)suffix_array.size(); i++) {
             if (suffix_array[i] > 0) {
-                suffix_array[j] = suffix_array[i];
-                if (j != i) {
-                    suffix_array[i] = -1;
-                }
-                j++;
+                std::swap(suffix_array[j++], suffix_array[i]);
             }
         }
     }
@@ -283,8 +273,8 @@ int SuffixSort::formNewString0(std::vector<int> &data, std::vector<int> &suffix_
     //now we should move all values to the end
     int last_free = n - 1;
     for (int i = n - 1; i >= lms_n; i--) {
-        if (suffix_array[i] != -1) {
-            suffix_array[last_free--] = suffix_array[i];
+        if (suffix_array[i] != EMPTY) {
+            std::swap(suffix_array[last_free--], suffix_array[i]);
         }
     }
 
@@ -302,6 +292,9 @@ int SuffixSort::formNewString0(std::vector<int> &data, std::vector<int> &suffix_
             //and suffix_array[`begin of the block`] points to the end of the block
             suffix_array[i] = suffix_array[suffix_array[i]];
         }
+    }
+    for (int i = 0; i < lms_n; i++) {
+        suffix_array[i] = EMPTY;
     }
     return new_alph_size;
 }
@@ -332,7 +325,9 @@ void SuffixSort::putLMSToBegin0(std::vector <int> &data, std::vector <int> &suff
     for (int i = 0; i < lms_n; i++) {
         //let j = suffix_array[i]
         //suffix_array[lms_n + j] -- index of the lms-suffix number j
-        suffix_array[i] = suffix_array[suffix_array[i]];
+        int j = suffix_array[i];
+        suffix_array[i] = suffix_array[j];
+        suffix_array[j] = EMPTY;
     }
 }
 
@@ -677,11 +672,7 @@ void SuffixSort::inducedSort1S(std::vector<int> &suffix_array,
         int j = 0;
         for (int i = 0; i < size; i++) {
             if (suffix_array[i] != EMPTY) {
-                suffix_array[j] = suffix_array[i];
-                if (j != i) {
-                    suffix_array[i] = EMPTY;
-                }
-                j++;
+                std::swap(suffix_array[j++], suffix_array[i]);
             }
         }
     }
@@ -755,11 +746,7 @@ int SuffixSort::formNewString1(std::vector<int> &suffix_array, int lms_n, int be
     int last_free = beg - 1;
     for (int i = beg - 1; i >= new_begin; i--) {
         if (suffix_array[i] != EMPTY) {
-            suffix_array[last_free] = suffix_array[i];
-            if (last_free != i) {
-                suffix_array[i] = EMPTY;
-            }
-            last_free--;
+            std::swap(suffix_array[last_free--], suffix_array[i]);
         }
     }
 

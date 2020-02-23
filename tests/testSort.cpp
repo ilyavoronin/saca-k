@@ -67,11 +67,11 @@ public:
 TEST_F(SortTests, testPutLMS0) {
     std::vector <int> data = {1, 2, 1, 3, 1, 2, 1, 5, 1, 2, 1, 8, 8, 8, 2, 2, 2, 7, 2, 3, 2, 0};
     int max_symb_number = 9;
-    std::vector <int> suffix_array(data.size(), -1);
+    std::vector <int> suffix_array(data.size(), E);
     std::vector <int> block_begin = {0, 1, 7, 15, 17, 17, 18, 18, 19, 22};
 
     int lms_n = test_putLMS0(data, block_begin, suffix_array, max_symb_number);
-    std::vector <int> expected_suffix_array = {21, -1, 2, 4, 6, 8, 10, -1, -1, -1, -1, -1, -1, 14, 18, -1, -1, -1, -1, -1, -1, -1};
+    std::vector <int> expected_suffix_array = {21, E, 2, 4, 6, 8, 10, E, E, E, E, E, E, 14, 18, E, E, E, E, E, E, E};
     int expected_lms_n = 8;
 
     ASSERT_EQ(lms_n, expected_lms_n);
@@ -80,29 +80,26 @@ TEST_F(SortTests, testPutLMS0) {
 
 TEST_F(SortTests, testInducedSort0Substrings) {
     std::vector <int> data = {1, 2, 1, 3, 1, 2, 1, 5, 1, 2, 1, 8, 8, 8, 2, 2, 2, 7, 2, 3, 2, 0};
-    std::vector <int> suffix_array = {21, -1, 2, 4, 6, 8, 10, -1, -1, -1, -1, -1, -1, 14, 18, -1, -1, -1, -1, -1, -1, -1};
+    std::vector <int> suffix_array = {21, E, 2, 4, 6, 8, 10, E, E, E, E, E, E, 14, 18, E, E, E, E, E, E, E};
     std::vector <int> block_begin = {0, 1, 7, 15, 17, 17, 18, 18, 19, 22};
     int max_symb_number = 9;
 
     test_inducedSort0(data, block_begin, suffix_array, max_symb_number, true);
-    std::vector <int> expected_suffix_array = {21, 4, 8, 2, 6, 10, 14, 18, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    std::vector <int> expected_suffix_array = {21, 4, 8, 2, 6, 10, 14, 18, E, E, E, E, E, E, E, E, E, E, E, E, E, E};
 
     ASSERT_EQ(suffix_array, expected_suffix_array);
 }
 
 TEST_F(SortTests, testFormNewString0) {
     std::vector <int> data = {1, 2, 1, 3, 1, 2, 1, 5, 1, 2, 1, 8, 8, 8, 2, 2, 2, 7, 2, 3, 2, 0};
-    std::vector <int> suffix_array = {21, 4, 8, 2, 6, 10, 14, 18, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+    std::vector <int> suffix_array = {21, 4, 8, 2, 6, 10, 14, 18, E, E, E, E, E, E, E, E, E, E, E, E, E, E};
     int lms_n = 8;
 
     int n_distinct = test_formNewString0(data, suffix_array, lms_n);
-    std::vector <int> expected_suffix_array = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 3, 2, 4, 2, 5, 6, 7, 0};
+    std::vector <int> expected_suffix_array = {E, E, E, E, E, E, E, E, E, E, E, E, E, E, 3, 2, 4, 2, 5, 6, 7, 0};
 
     ASSERT_EQ(n_distinct, 7);
-    int n = suffix_array.size();
-    for (int i = n - 1; i > n - 1 - lms_n; i--) {
-        ASSERT_EQ(suffix_array[i], expected_suffix_array[i]);
-    }
+    ASSERT_EQ(suffix_array, expected_suffix_array);
 }
 
 TEST_F(SortTests, testPutLMS1) {
@@ -202,7 +199,7 @@ TEST_F(SortTests, testPutLMSTobegin0) {
     int lms_n = 8;
 
     test_putLMSToBegin0(data, suffix_array, lms_n);
-    std::vector <int> expected_suffix_array = {21, 4, 8, 2, 6, 10, 14, 18, E, E, E, E, E, E, 2, 4, 6, 8, 10, 14, 18, 21};
+    std::vector <int> expected_suffix_array = {21, 4, 8, 2, 6, 10, 14, 18, E, E, E, E, E, E, E, E, E, E, E, E, E, E};
 
     ASSERT_EQ(suffix_array, expected_suffix_array);
 }
@@ -210,12 +207,12 @@ TEST_F(SortTests, testPutLMSTobegin0) {
 TEST_F(SortTests, testPutSortedLMS0) {
     std::vector <int> data = {1, 2, 1, 3, 1, 2, 1, 5, 1, 2, 1, 8, 8, 8, 2, 2, 2, 7, 2, 3, 2, 0};
     std::vector <int> block_begin = {0, 1, 7, 15, 17, 17, 18, 18, 19, 22};
-    std::vector <int> suffix_array = {21, 4, 8, 2, 6, 10, 14, 18, E, E, E, E, E, E, 2, 4, 6, 8, 10, 14, 18, 21};
+    std::vector <int> suffix_array = {21, 4, 8, 2, 6, 10, 14, 18, E, E, E, E, E, E, E, E, E, E, E, E, E, E};
     int max_symb_number = 9;
     int lms_n = 8;
 
     test_putSortedLMS0(data, block_begin, suffix_array, max_symb_number, lms_n);
-    std::vector <int> expected_suffix_array = {21, -1, 4, 8, 2, 6, 10, -1, -1, -1, -1, -1, -1, 14, 18, -1, -1, -1, -1, -1, -1, -1};
+    std::vector <int> expected_suffix_array = {21, E, 4, 8, 2, 6, 10, E, E, E, E, E, E, 14, 18, E, E, E, E, E, E, E};
 
     ASSERT_EQ(suffix_array, expected_suffix_array);
 }
