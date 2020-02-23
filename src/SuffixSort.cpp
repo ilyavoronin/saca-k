@@ -47,7 +47,7 @@ void SuffixSort::sortSuffixes0(std::vector <int> &data, std::vector <int> &suffi
     int n_distinct = formNewString0(data, suffix_array, lms_n);
     if (n_distinct == lms_n) {
         //then all blocks contain only one index
-        for (int i = data.size() - lms_n; i < lms_n; i++) {
+        for (int i = data.size() - lms_n; i < data.size(); i++) {
             //suffix_array[i] also points to begin/end(in this case end == begin) of the block
             suffix_array[suffix_array[i]] = i;
         }

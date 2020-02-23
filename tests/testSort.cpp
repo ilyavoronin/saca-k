@@ -20,7 +20,7 @@ public:
     int test_formNewString0(std::vector <int> &data,
                               std::vector <int> &suffix_array,
                               int lms_n) {
-        SuffixSort().formNewString0(data, suffix_array, lms_n);
+        return SuffixSort().formNewString0(data, suffix_array, lms_n);
     }
 
     int test_putLMS1(std::vector <int> &suffix_array,
