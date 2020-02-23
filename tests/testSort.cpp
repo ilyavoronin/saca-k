@@ -162,3 +162,25 @@ TEST_F(SortTests, testPutSortedLMS1) {
 
     ASSERT_EQ(suffix_array, expected_suffix_array);
 }
+
+TEST_F(SortTests, testInduceSortL) {
+    std::vector <int> suffix_array = {21, 15, 17, E, E, E, E, E, E, E, E, E, E, E, 3, 2, 4, 2, 5, 6, 7, 0};
+    int beg = 14;
+    int size = 8;
+
+    test_inducedSort1L(suffix_array, beg, size, false);
+    std::vector <int> expected_suffix_array = {E, E, E, 14, 16, E, E, 20, E, E, E, E, E, E, 3, 2, 4, 2, 5, 6, 7, 0};
+
+    ASSERT_EQ(suffix_array, expected_suffix_array);
+}
+
+TEST_F(SortTests, testInduceSortS) {
+    std::vector <int> suffix_array = {E, E, E, 14, 16, E, E, 20, E, E, E, E, E, E, 3, 2, 4, 2, 5, 6, 7, 0};
+    int beg = 14;
+    int size = 8;
+
+    test_inducedSort1S(suffix_array, beg, size, false);
+    std::vector <int> expected_suffix_array = {21, 15, 17, 14, 16, 18, 19, 20, E, E, E, E, E, E, 3, 2, 4, 2, 5, 6, 7, 0};
+
+    ASSERT_EQ(suffix_array, expected_suffix_array);
+}

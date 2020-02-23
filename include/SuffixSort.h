@@ -7,7 +7,7 @@
 class SuffixSort {
 public:
     friend class SortTests;
-    void sort(std::vector <int> &data, std::vector <int> &suffix_array);
+    void build_suffix_array(std::vector <int> &data, std::vector <int> &suffix_array);
 
 private:
     //first level of recursion, suffix array will be stored in `suffix_array`

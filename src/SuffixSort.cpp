@@ -1,7 +1,7 @@
 #include "SuffixSort.h"
 
 
-void SuffixSort::sort(std::vector <int> &data, std::vector <int> &suffix_array) {
+void SuffixSort::build_suffix_array(std::vector <int> &data, std::vector <int> &suffix_array) {
     for (int i = 0; i < (int)data.size() - 1; i++) {
         data[i]++;
     }
@@ -88,7 +88,7 @@ void SuffixSort::sortSuffixes1(std::vector <int> &suffix_array, int beg, int siz
 
     putSortedLMS1(suffix_array, lms_n);
     inducedSort1L(suffix_array, beg, size, false);
-    inducedSort1L(suffix_array, beg, size, false);
+    inducedSort1S(suffix_array, beg, size, false);
 }
 
 int SuffixSort::putLMS0(std::vector<int> &data, std::vector<int> &block_begin,
@@ -533,7 +533,7 @@ void SuffixSort::inducedSort1L(std::vector<int> &suffix_array,
             //if (j + 1) is l-type then suffix_array[j + 1] points to the begin of the block and therefore < i
             //if (j + 1) is lms-type then suffix_array[j + 1] points to the end of the block and therefore > i
             bool isL2 = j != (beg + size - 1) && suffix_array[j] == suffix_array[j + 1] && suffix_array[j + 1] < i;
-            if (isL1 || isL2) {
+            if (!isL1 && !isL2) {
                 suffix_array[i] = EMPTY;
             }
             //Also if we are sorting lms-substrings we don't need L-suffixes and LMS-suffixes
@@ -667,10 +667,8 @@ void SuffixSort::inducedSort1S(std::vector<int> &suffix_array,
         i--;
     }
 
-    if (sort_lms_substrings) {
-        //we delete the last lms index earlier
-        suffix_array[0] = beg + size - 1;
-    }
+    //we delete the last lms index earlier
+    suffix_array[0] = beg + size - 1;
 
     if (sort_lms_substrings) {
         //now indexes that corresponds to the lms-suffixes are stored
