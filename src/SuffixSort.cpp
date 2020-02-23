@@ -223,8 +223,9 @@ void SuffixSort::inducedSort0(std::vector <int> &data,
 int SuffixSort::formNewString0(std::vector<int> &data, std::vector<int> &sorted_suffixes, int lms_n) {
     int n = data.size();
     int block_begin = 0;
+    //sorted_suffixes[0] - 1 >= 0 because 0 is not lms
     //if we divide indexes of lms-suffix by 2, we will get different values from 0 to n / 2
-    sorted_suffixes[lms_n + sorted_suffixes[0] / 2] = block_begin;
+    sorted_suffixes[lms_n + (sorted_suffixes[0] - 1) / 2] = block_begin;
     int prev_lms = sorted_suffixes[0];
     int prev_lms_end = sorted_suffixes[0]; // sorted_suffixes[0] is always n - 1
     int new_alph_size = 1;
@@ -274,7 +275,7 @@ int SuffixSort::formNewString0(std::vector<int> &data, std::vector<int> &sorted_
             block_begin = i;
             new_alph_size++;
         }
-        sorted_suffixes[lms_n + sorted_suffixes[i] / 2] = block_begin;
+        sorted_suffixes[lms_n + (sorted_suffixes[i] - 1) / 2] = block_begin;
         prev_lms = cur_lms;
         prev_lms_end = cur_lms_end;
     }
@@ -688,21 +689,24 @@ void SuffixSort::inducedSort1S(std::vector<int> &sorted_suffixes,
     }
 }
 
-int SuffixSort::formNewString1(std::vector<int> &sorted_suffixes, int lms_n, int begin, int size){
+int SuffixSort::formNewString1(std::vector<int> &sorted_suffixes, int lms_n, int beg, int size){
     int block_begin = 0;
     int new_alph_size = 0;
-    //from where we will store the new data
-    int new_begin = begin - lms_n;
-    sorted_suffixes[new_begin + sorted_suffixes[0] / 2] = block_begin;
+    //from where we will store new data
+    int new_begin = beg - size / 2;
+    //sorted_suffixes[0] - beg - 1 >= 0 because `beg` is not lms
+    //and because there is at least one element between lms-indexes we can divide by 2
+    //and get distinct values for lms-indexes
+    sorted_suffixes[new_begin + (sorted_suffixes[0] - beg - 1) / 2] = block_begin;
     new_alph_size++;
+    int prev_lms = sorted_suffixes[0];
     int prev_lms_end = sorted_suffixes[0]; // sorted_suffixes[0] is always (beg + size - 1)
     for (int i = 1; i < lms_n; i++) {
-        int i1 = sorted_suffixes[i];
-        int j1 = sorted_suffixes[i - 1];
-        //we don't know yet where lms-suffix for i1 ends
-        int k1 = i1 + 1;
+        int cur_lms = sorted_suffixes[i];
+        //we don't know yet where lms-substring for `cur_lms` ends
+        int k1 = cur_lms + 1;
         int cur_lms_end;
-        while (k1 < begin + size) {
+        while (k1 < beg + size) {
             if (sorted_suffixes[k1] < sorted_suffixes[k1 - 1]) {
                 break;
             }
@@ -710,7 +714,7 @@ int SuffixSort::formNewString1(std::vector<int> &sorted_suffixes, int lms_n, int
         }
         //k1 now points to the L suffix
         int last_s;
-        while (k1 < begin + size) {
+        while (k1 < beg + size) {
             if (sorted_suffixes[k1] > sorted_suffixes[k1 - 1]) {
                 cur_lms_end = last_s;
                 break;
@@ -720,18 +724,18 @@ int SuffixSort::formNewString1(std::vector<int> &sorted_suffixes, int lms_n, int
             }
             k1++;
         }
-        if (k1 == begin + size) {
-            cur_lms_end = begin + size - 1;
+        if (k1 == beg + size) {
+            cur_lms_end = beg + size - 1;
         }
 
-        //know we can compare lms-suffixes i1 and j1
+        //know we can compare lms-suffixes cur_lms and prev_lms
         bool is_eq = true;
-        if (cur_lms_end - i1 != prev_lms_end - j1) {
+        if (cur_lms_end - cur_lms != prev_lms_end - prev_lms) {
             is_eq = false;
         }
         else {
-            for (; i1 <= cur_lms_end && j1 <= prev_lms_end; i1++, j1++) {
-                if (sorted_suffixes[i1] != sorted_suffixes[j1]) {
+            for (; cur_lms <= cur_lms_end && prev_lms <= prev_lms_end; cur_lms++, prev_lms++) {
+                if (sorted_suffixes[cur_lms] != sorted_suffixes[prev_lms]) {
                     is_eq = false;
                     break;
                 }
@@ -743,21 +747,27 @@ int SuffixSort::formNewString1(std::vector<int> &sorted_suffixes, int lms_n, int
             block_begin = i;
             new_alph_size++;
         }
-        sorted_suffixes[new_begin + sorted_suffixes[i] / 2] = block_begin;
+        sorted_suffixes[new_begin + (sorted_suffixes[i] - beg - 1) / 2] = block_begin;
+        prev_lms = cur_lms;
+        prev_lms_end = cur_lms_end;
     }
     sorted_suffixes[block_begin] = lms_n - 1;
 
     //now we should move all values to the end
-    int last_free = begin - 1;
-    for (int i = begin - 1; i >= new_begin; i--) {
+    int last_free = beg - 1;
+    for (int i = beg - 1; i >= new_begin; i--) {
         if (sorted_suffixes[i] != EMPTY) {
-            sorted_suffixes[last_free--] = sorted_suffixes[i];
+            sorted_suffixes[last_free] = sorted_suffixes[i];
+            if (last_free != i) {
+                sorted_suffixes[i] = EMPTY;
+            }
+            last_free--;
         }
     }
 
     //assign all S-characters pointer to the end of it's block
     bool cur_type = 0;
-    for (int i = begin - 2; i > begin - 1 - lms_n; i--) {
+    for (int i = beg - 2; i > beg - 1 - lms_n; i--) {
         if (sorted_suffixes[i] < sorted_suffixes[i + 1]) {
             cur_type = 0;
         }
@@ -765,10 +775,13 @@ int SuffixSort::formNewString1(std::vector<int> &sorted_suffixes, int lms_n, int
             cur_type = 1;
         }
         if (cur_type == 0) {
-            //sorted_suffixes[i] points to the begin of the block
-            //and sorted_suffixes[`begin of the block`] points to the end of the block
+            //sorted_suffixes[i] points to the beg of the block
+            //and sorted_suffixes[`beg of the block`] points to the end of the block
             sorted_suffixes[i] = sorted_suffixes[sorted_suffixes[i]];
         }
+    }
+    for (int i = 0; i < lms_n; i++) {
+        sorted_suffixes[i] = EMPTY;
     }
     return new_alph_size;
 }

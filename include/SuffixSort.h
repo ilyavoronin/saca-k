@@ -63,7 +63,7 @@ private:
     void inducedSort1S(std::vector <int> &sorted_suffixes, int beg, int size, bool sort_lms_substrings);
 
     //return the number of distinct values in the new string
-    int formNewString1(std::vector <int> &sorted_suffixes, int lms_n, int begin, int size);
+    int formNewString1(std::vector <int> &sorted_suffixes, int lms_n, int beg, int size);
 
     void putLMSToBegin1(std::vector <int> &sorted_suffixes, int lms_n, int beg, int size);
 

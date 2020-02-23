@@ -36,6 +36,10 @@ public:
         SuffixSort().inducedSort1S(sorted_suffixes, beg, size, sort_lms_substrings);
     }
 
+    int test_formNewString1(std::vector <int> &sorted_suffixes, int lms_n, int begin, int size) {
+        return SuffixSort().formNewString1(sorted_suffixes, lms_n, begin, size);
+    }
+
     const int E = SuffixSort().EMPTY;
 };
 
@@ -113,5 +117,18 @@ TEST_F(SortTests, testInducedSort1SSubstrings) {
     test_inducedSort1S(sorted_suffixes, beg, size, true);
     std::vector <int> expected_sorted_suffixes = {21, 15, 17, E, E, E, E, E, E, E, E, E, E, E, 3, 2, 4, 2, 5, 6, 7, 0};
 
+    ASSERT_EQ(sorted_suffixes, expected_sorted_suffixes);
+}
+
+TEST_F(SortTests, testFormNewString1) {
+    std::vector <int> sorted_suffixes = {21, 15, 17, E, E, E, E, E, E, E, E, E, E, E, 3, 2, 4, 2, 5, 6, 7, 0};
+    int beg = 14;
+    int size = 8;
+    int lms_n = 3;
+
+    int n_distinct = test_formNewString1(sorted_suffixes, lms_n, beg, size);
+    std::vector <int> expected_sorted_suffixes = {E, E, E, E, E, E, E, E, E, E, E, 1, 2, 0, 3, 2, 4, 2, 5, 6, 7, 0};
+
+    ASSERT_EQ(n_distinct, 3);
     ASSERT_EQ(sorted_suffixes, expected_sorted_suffixes);
 }
