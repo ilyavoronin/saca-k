@@ -790,9 +790,9 @@ void SuffixSort::putLMSToBegin1(std::vector <int> &suffix_array, int lms_n, int 
     //at first store all lms-suffixes in the `suffix_array` from beg - lms_n to beg
     int n = size;
     //current position for lms-suffix
-    int last_pos = beg - 1;
+    int last_free = beg - 1;
     int last_type = 0, cur_type;
-    for (int i = (int) beg + size - 2; i >= 0; i--) {
+    for (int i = (int) beg + size - 2; i >= beg; i--) {
         if (suffix_array[i] == suffix_array[i + 1]) {
             cur_type = last_type;
         } else {
@@ -803,7 +803,7 @@ void SuffixSort::putLMSToBegin1(std::vector <int> &suffix_array, int lms_n, int 
             }
         }
         if (cur_type == 1 && last_type == 0) {
-            suffix_array[last_pos--] = i + 1;
+            suffix_array[last_free--] = i + 1;
         }
         last_type = cur_type;
     }
@@ -811,8 +811,9 @@ void SuffixSort::putLMSToBegin1(std::vector <int> &suffix_array, int lms_n, int 
     //put all lms-suffixes in the right places in `suffix_array`
     for (int i = 0; i < lms_n; i++) {
         //let j = suffix_array[i]
-        //suffix_array[lms_n + j] -- index of the lms-suffix number j
-        suffix_array[i] = suffix_array[lms_n + suffix_array[i]];
-        suffix_array[lms_n + suffix_array[i]] = EMPTY;
+        //suffix_array[j] -- index of the lms-suffix number j
+        int j = suffix_array[i];
+        suffix_array[i] = suffix_array[j];
+        suffix_array[j] = EMPTY;
     }
 }
