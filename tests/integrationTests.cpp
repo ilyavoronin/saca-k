@@ -3,10 +3,9 @@
 #include <fstream>
 
 #include "SuffixSort.h"
-#include <windows.h>
 
 const int MAX_CHAR_TEST_NUM = 11;
-const int MAX_BIN_TEST_NUM = 0;
+const int MAX_BIN_TEST_NUM = 2;
 
 class IntegrationSortTests : public testing::TestWithParam<int> {
 public:
@@ -26,17 +25,14 @@ public:
         }
     }
     void load_bin_test(int test_num) {
-        std::cerr << test_num << "\n";
         std::string test_file_name = PATH_PREF + "bin_tests/test" + std::to_string(test_num) + ".txt";
         std::string test_answer_file_name = PATH_PREF + "bin_tests/test" + std::to_string(test_num) + ".a";
-        std::cerr << test_file_name << "\n";
         std::ifstream in(test_file_name, std::ios::binary);
         char c;
         while (in.get(c)) {
             data.push_back(((int)c + 256) % 256);
         }
         in.close();
-        std::cerr << data.size() << "\n";
         in.open(test_answer_file_name);
         int n;
         while (in >> n) {

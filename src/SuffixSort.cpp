@@ -163,11 +163,15 @@ void SuffixSort::inducedSort0(std::vector <int> &data,
         }
         int symb = data[j - 1];
         if (data[j - 1] >= data[j]) {
-            suffix_array[block_begin[symb] + cur_shift[symb]] = j - 1;
+            int pos = block_begin[symb] + cur_shift[symb];
+            suffix_array[pos] = j - 1;
             cur_shift[symb]++;
             if (sort_lms_substrings) {
                 //we don't need this value anymore
                 suffix_array[i] = EMPTY;
+                if (j - 1 == 0) {
+                    suffix_array[pos] = EMPTY;
+                }
             }
         }
     }
