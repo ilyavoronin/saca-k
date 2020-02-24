@@ -6,6 +6,7 @@
 
 const int MAX_CHAR_TEST_NUM = 11;
 const int MAX_BIN_TEST_NUM = 2;
+const int MAX_INT_TEST_NUM = 4;
 
 class IntegrationSortTests : public testing::TestWithParam<int> {
 public:
@@ -39,6 +40,22 @@ public:
             expected_suffix_array.push_back(n);
         }
     }
+
+    void load_int_test(int test_num) {
+        std::string test_file_name = PATH_PREF + "int_tests/test" + std::to_string(test_num) + ".txt";
+        std::string test_answer_file_name = PATH_PREF + "int_tests/test" + std::to_string(test_num) + ".a";
+        std::ifstream in(test_file_name, std::ios::binary);
+        int n;
+        while (in >> n) {
+            data.push_back(n);
+        }
+        in.close();
+        in.open(test_answer_file_name);
+        while (in >> n) {
+            expected_suffix_array.push_back(n);
+        }
+    }
+
     bool check_ans(std::vector <int> &suffix_array) {
         for (int i = 0; i < (int)data.size() - 1; i++) {
             int i1 = suffix_array[i];
@@ -73,6 +90,9 @@ TEST_P(IntegrationSortTests, testAll) {
     if (test_number >= 100 && test_number < 200) {
         load_bin_test(test_number - 100);
     }
+    if (test_number >= 200) {
+        load_int_test(test_number - 200);
+    }
     std::vector <int> suffix_array;
 
     SuffixSort().build_suffix_array(data, suffix_array);
@@ -81,3 +101,4 @@ TEST_P(IntegrationSortTests, testAll) {
 
 INSTANTIATE_TEST_SUITE_P(CharTests, IntegrationSortTests, testing::Range(0, MAX_CHAR_TEST_NUM + 1));
 INSTANTIATE_TEST_SUITE_P(BinTests, IntegrationSortTests, testing::Range(100, 100 + MAX_BIN_TEST_NUM + 1));
+INSTANTIATE_TEST_SUITE_P(IntTests, IntegrationSortTests, testing::Range(200, 200 + MAX_INT_TEST_NUM + 1));
