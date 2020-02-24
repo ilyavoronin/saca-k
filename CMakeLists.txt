@@ -38,5 +38,8 @@ if (CMAKE_VERSION VERSION_LESS 2.8.11)
 endif()
 
 add_executable(SACA_K src/main.cpp
-               src/SuffixSort.cpp include/SuffixSort.h)
+               src/SuffixSort.cpp
+               src/inducedSortLevel0.cpp
+               src/formNewString.cpp
+               src/inducedSortLevel1.cpp)
 add_subdirectory(tests)
