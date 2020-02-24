@@ -251,8 +251,8 @@ int SuffixSort::formNewString0(std::vector<int> &data, std::vector<int> &suffix_
             is_eq = false;
         }
         else {
-            for (; cur_lms <= cur_lms_end && prev_lms <= prev_lms_end; cur_lms++, prev_lms++) {
-                if (data[cur_lms] != data[prev_lms]) {
+            for (int i1 = cur_lms, i2 = prev_lms; i1 <= cur_lms_end; i1++, i2++) {
+                if (data[i1] != data[i2]) {
                     is_eq = false;
                     break;
                 }
@@ -300,8 +300,8 @@ int SuffixSort::formNewString0(std::vector<int> &data, std::vector<int> &suffix_
 }
 
 void SuffixSort::putLMSToBegin0(std::vector <int> &data, std::vector <int> &suffix_array, int lms_n) {
-    //at first store all lms-suffixes in the `suffix_array` from lms_n to 2 * lms_n
-    int n = data.size();
+    //at first store all lms-suffixes in the `suffix_array` from (n - lms_n) to n
+    int n = suffix_array.size();
     //current position for lms-suffix
     int last_pos = n - 1;
     int last_type = 0, cur_type;
@@ -353,6 +353,7 @@ int SuffixSort::putLMS1(std::vector<int> &suffix_array, int beg, int size) {
             int block_end = suffix_array[i + 1];
             if (block_end == 0) {
                 suffix_array[block_end] = i + 1;
+                last_type = cur_type;
                 continue;
             }
             if (suffix_array[block_end] == EMPTY) {
@@ -366,7 +367,7 @@ int SuffixSort::putLMS1(std::vector<int> &suffix_array, int beg, int size) {
                     suffix_array[block_end] = i + 1;
                 }
             }
-            else if(suffix_array[block_end] != EMPTY && suffix_array[block_end] < 0) {
+            else if(suffix_array[block_end] < 0) {
                 //points to the free space in the block
                 int k = block_end + suffix_array[block_end]; //in fact the value subtracts
                 if (suffix_array[k] == EMPTY) {
@@ -391,6 +392,7 @@ int SuffixSort::putLMS1(std::vector<int> &suffix_array, int beg, int size) {
                     std::swap(suffix_array[k], last_value);
                     k++;
                 }
+                suffix_array[k] = last_value;
 
                 //then perform the same actions as in the first case
                 if (suffix_array[block_end - 1] == EMPTY) {
@@ -462,7 +464,7 @@ void SuffixSort::inducedSort1L(std::vector<int> &suffix_array,
                     suffix_array[block_begin] = j - 1;
                 }
             }
-            else if (suffix_array[block_begin] != EMPTY && suffix_array[block_begin] < 0) {
+            else if (suffix_array[block_begin] < 0) {
                 //points to free position in the block
                 int k = block_begin - suffix_array[block_begin]; //in fact the value is added
                 if (suffix_array[k] == EMPTY) {
@@ -587,7 +589,7 @@ void SuffixSort::inducedSort1S(std::vector<int> &suffix_array,
                     suffix_array[block_end] = j - 1;
                 }
             }
-            else if(suffix_array[block_end] != EMPTY && suffix_array[block_end] < 0) {
+            else if(suffix_array[block_end] < 0) {
                 //points to the free space in the block
                 int k = block_end + suffix_array[block_end]; //in fact the value subtracts
                 if (suffix_array[k] == EMPTY) {
@@ -723,8 +725,8 @@ int SuffixSort::formNewString1(std::vector<int> &suffix_array, int lms_n, int be
             is_eq = false;
         }
         else {
-            for (; cur_lms <= cur_lms_end && prev_lms <= prev_lms_end; cur_lms++, prev_lms++) {
-                if (suffix_array[cur_lms] != suffix_array[prev_lms]) {
+            for (int i1 = cur_lms, i2 = prev_lms; i1 <= cur_lms_end; i1++, i2++) {
+                if (suffix_array[i1] != suffix_array[i2]) {
                     is_eq = false;
                     break;
                 }

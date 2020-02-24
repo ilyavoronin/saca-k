@@ -5,7 +5,7 @@
 #include "SuffixSort.h"
 #include <windows.h>
 
-const int MAX_CHAR_TEST_NUM = 2;
+const int MAX_CHAR_TEST_NUM = 3;
 
 class IntegrationSortTests : public testing::TestWithParam<int> {
 public:
@@ -23,6 +23,26 @@ public:
         while (in >> n) {
             expected_suffix_array.push_back(n);
         }
+    }
+    bool check_ans(std::vector <int> &suffix_array) {
+        for (int i = 0; i < (int)data.size() - 1; i++) {
+            int i1 = suffix_array[i];
+            int i2 = suffix_array[i + 1];
+            while (i1 < data.size() && i2 < data.size()) {
+                if (data[i1] > data[i2]) {
+                    return false;
+                }
+                if (data[i1] < data[i2]) {
+                    break;
+                }
+                i1++;
+                i2++;
+            }
+            if (i2 == data.size()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     const std::string PATH_PREF = "../../tests/";
