@@ -5,7 +5,7 @@
 #include "SuffixSort.h"
 #include <windows.h>
 
-const int MAX_CHAR_TEST_NUM = 3;
+const int MAX_CHAR_TEST_NUM = 7;
 
 class IntegrationSortTests : public testing::TestWithParam<int> {
 public:
