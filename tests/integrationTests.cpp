@@ -5,7 +5,7 @@
 #include "SuffixSort.h"
 #include <windows.h>
 
-const int MAX_CHAR_TEST_NUM = 7;
+const int MAX_CHAR_TEST_NUM = 11;
 
 class IntegrationSortTests : public testing::TestWithParam<int> {
 public:
@@ -59,4 +59,4 @@ TEST_P(IntegrationSortTests, testAll) {
     ASSERT_EQ(suffix_array, expected_suffix_array);
 }
 
-INSTANTIATE_TEST_SUITE_P(CharTests, IntegrationSortTests, testing::Range(1, MAX_CHAR_TEST_NUM + 1));
+INSTANTIATE_TEST_SUITE_P(CharTests, IntegrationSortTests, testing::Range(0, MAX_CHAR_TEST_NUM + 1));

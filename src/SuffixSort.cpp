@@ -2,6 +2,10 @@
 
 
 void SuffixSort::build_suffix_array(std::vector <int> &data, std::vector <int> &suffix_array) {
+    if (data.size() == 0) {
+        suffix_array.clear();
+        return;
+    }
     for (int i = 0; i < (int)data.size(); i++) {
         data[i]++;
     }
